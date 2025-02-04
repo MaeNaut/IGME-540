@@ -310,23 +310,22 @@ void Game::Draw(float deltaTime, float totalTime)
 		Graphics::Context->ClearDepthStencilView(Graphics::DepthBufferDSV.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
 	}
 
-	// DRAW geometry
-	// - These steps are generally repeated for EACH object you draw
-	// - Other Direct3D calls will also be necessary to do more complex things
-	{
-
-		for (std::shared_ptr mesh : meshes)
-		{
-			mesh->Draw(deltaTime, totalTime);
-		}
-	}
-
 	// Constant buffer
 	{
+		// Rotate around Z based on time
+		XMMATRIX trMat = XMMatrixTranslation(sin(totalTime), 0, 0);
+		XMMATRIX rotZMat = XMMatrixRotationZ(totalTime);
+
+		// Store the matrix before copy
+		XMFLOAT4X4 tr;
+		XMFLOAT4X4 rotZ;
+		XMStoreFloat4x4(&tr, trMat);
+		XMStoreFloat4x4(&rotZ, rotZMat);
+
 		// Collect the data locally
 		VertexShaderData dataToCopy = {};
 		dataToCopy.colorTint = XMFLOAT4(0.0f, 1.0f, 1.0f, 1.0f);
-		dataToCopy.offset = XMFLOAT3(0.2f, 0.0f, 0.0f);
+		dataToCopy.transform = tr;
 
 		// Map() the buffer first
 		D3D11_MAPPED_SUBRESOURCE mapped = {};
@@ -342,6 +341,17 @@ void Game::Draw(float deltaTime, float totalTime)
 
 		// Unmap when done
 		Graphics::Context->Unmap(constantBuffer.Get(), 0);
+	}
+
+	// DRAW geometry
+	// - These steps are generally repeated for EACH object you draw
+	// - Other Direct3D calls will also be necessary to do more complex things
+	{
+
+		for (std::shared_ptr mesh : meshes)
+		{
+			mesh->Draw(deltaTime, totalTime);
+		}
 	}
 
 	// Frame END
