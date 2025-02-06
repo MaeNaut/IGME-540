@@ -4,11 +4,8 @@
 #include "Input.h"
 #include "PathHelpers.h"
 #include "Window.h"
-#include "Mesh.h"
+#include "BufferStructs.h"
 
-#include <DirectXMath.h>
-#include <memory>
-#include <vector>
 
 // Needed for a helper function to load pre-compiled shader files
 #pragma comment(lib, "d3dcompiler.lib")
@@ -25,15 +22,6 @@
 
 // For the DirectX Math library
 using namespace DirectX;
-
-XMFLOAT4 bgColor(1.0f, 1.0f, 1.0f, 1.0f);
-bool show_demo_window = true;
-int zipCode = 00501;
-
-// Meshes and a mesh vector
-// Declaring the shared pointer in header file caused the errors
-std::shared_ptr<Mesh> mesh;
-std::vector<std::shared_ptr<Mesh>> meshes;
 
 // --------------------------------------------------------
 // Called once per program, after the window and graphics API
@@ -312,20 +300,21 @@ void Game::Draw(float deltaTime, float totalTime)
 
 	// Constant buffer
 	{
-		// Rotate around Z based on time
-		XMMATRIX trMat = XMMatrixTranslation(sin(totalTime), 0, 0);
-		XMMATRIX rotZMat = XMMatrixRotationZ(totalTime);
+		//// Rotate around Z based on time
+		//XMMATRIX trMat = XMMatrixTranslation(sin(totalTime), 0, 0);
+		//XMMATRIX rotZMat = XMMatrixRotationZ(totalTime);
 
-		// Store the matrix before copy
-		XMFLOAT4X4 tr;
-		XMFLOAT4X4 rotZ;
-		XMStoreFloat4x4(&tr, trMat);
-		XMStoreFloat4x4(&rotZ, rotZMat);
+		//// Store the matrix before copy
+		//XMFLOAT4X4 tr;
+		//XMFLOAT4X4 rotZ;
+		//XMStoreFloat4x4(&tr, trMat);
+		//XMStoreFloat4x4(&rotZ, rotZMat);
 
 		// Collect the data locally
 		VertexShaderData dataToCopy = {};
-		dataToCopy.colorTint = XMFLOAT4(0.0f, 1.0f, 1.0f, 1.0f);
-		dataToCopy.transform = tr;
+		dataToCopy.colorTint = colorTint;
+		dataToCopy.offset = offset;
+		// datatoCopy.transform = tr
 
 		// Map() the buffer first
 		D3D11_MAPPED_SUBRESOURCE mapped = {};
@@ -449,6 +438,12 @@ void Game::CustomUI()
 			ImGui::Text("\tVertices:  %d", meshes[i]->GetVertexCount());
 			ImGui::Text("\tIndices:   %d", meshes[i]->GetIndexCount());
 		}
+	}
+
+	if (ImGui::CollapsingHeader("Constant Buffer"))
+	{
+		ImGui::DragFloat3("Offset", &offset.x, 0.05f, 0.0f, 0.0f, "%.2f", 0);
+		ImGui::ColorEdit4("Mesh Color Tint", &colorTint.x);
 	}
 
 	ImGui::End();

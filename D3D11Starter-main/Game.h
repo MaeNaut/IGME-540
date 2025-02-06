@@ -1,14 +1,12 @@
 #pragma once
 
+#include "Mesh.h"
+
 #include <d3d11.h>
 #include <wrl/client.h>
 #include <DirectXMath.h>
-
-struct VertexShaderData
-{
-	DirectX::XMFLOAT4 colorTint;
-	DirectX::XMFLOAT4X4 transform;
-};
+#include <memory>
+#include <vector>
 
 class Game
 {
@@ -28,7 +26,6 @@ public:
 	void CustomUI();
 
 private:
-
 	// Initialization helper methods - feel free to customize, combine, remove, etc.
 	void LoadShaders();
 	void CreateGeometry();
@@ -48,5 +45,16 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11InputLayout> inputLayout;
 
 	Microsoft::WRL::ComPtr<ID3D11Buffer> constantBuffer;
-};
 
+
+	// Variables for UI
+	bool show_demo_window = true;
+	int zipCode = 00501;
+	DirectX::XMFLOAT4 bgColor = { 1.0f, 1.0f, 1.0f, 1.0f };
+	DirectX::XMFLOAT3 offset = { 0.2f, 0.0f, 0.0f };
+	DirectX::XMFLOAT4 colorTint = { 1.0f, 0.5f, 0.5f, 1.0f };
+
+	// Meshes
+	std::shared_ptr<Mesh> mesh;
+	std::vector<std::shared_ptr<Mesh>> meshes;
+};
