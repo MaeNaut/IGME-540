@@ -5,6 +5,7 @@
 #include "PathHelpers.h"
 #include "Window.h"
 #include "BufferStructs.h"
+#include "Transform.h"
 
 
 // Needed for a helper function to load pre-compiled shader files
@@ -22,6 +23,7 @@
 
 // For the DirectX Math library
 using namespace DirectX;
+Transform transform;
 
 // --------------------------------------------------------
 // Called once per program, after the window and graphics API
@@ -34,6 +36,7 @@ void Game::Initialize()
 	//  - You'll be expanding and/or replacing these later
 	LoadShaders();
 	CreateGeometry();
+
 
 	// Set initial graphics API state
 	//  - These settings persist until we change them
@@ -86,6 +89,7 @@ void Game::Initialize()
 		//ImGui::StyleColorsLight();
 		//ImGui::StyleColorsClassic();
 	}
+	transform = Transform();
 }
 
 
@@ -280,6 +284,14 @@ void Game::Update(float deltaTime, float totalTime)
 	// Example input checking: Quit if the escape key is pressed
 	if (Input::KeyDown(VK_ESCAPE))
 		Window::Quit();
+
+	// Transform
+	transform.SetPosition(sin(totalTime), 0, 0);
+	transform.Rotate(0, 0, deltaTime);
+
+	float s = sin(totalTime) * 0.5f + 1.0f;
+
+	transform.SetScale(s, s, s);
 }
 
 
@@ -316,6 +328,9 @@ void Game::Draw(float deltaTime, float totalTime)
 		dataToCopy.offset = offset;
 		// datatoCopy.transform = tr
 
+		// Temp
+		dataToCopy.worldMatrix = transform.GetWorldMatrix();
+
 		// Map() the buffer first
 		D3D11_MAPPED_SUBRESOURCE mapped = {};
 		Graphics::Context->Map(
@@ -333,13 +348,11 @@ void Game::Draw(float deltaTime, float totalTime)
 	}
 
 	// DRAW geometry
-	// - These steps are generally repeated for EACH object you draw
-	// - Other Direct3D calls will also be necessary to do more complex things
+	// Loop through the game entities and draw each one
 	{
-
 		for (std::shared_ptr mesh : meshes)
 		{
-			mesh->Draw(deltaTime, totalTime);
+			mesh->Draw();
 		}
 	}
 

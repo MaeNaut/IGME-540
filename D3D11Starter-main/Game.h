@@ -54,7 +54,7 @@ private:
 	DirectX::XMFLOAT3 offset = { 0.2f, 0.0f, 0.0f };
 	DirectX::XMFLOAT4 colorTint = { 1.0f, 0.5f, 0.5f, 1.0f };
 
-	// Meshes
+	// Mesh Variables
 	std::shared_ptr<Mesh> mesh;
 	std::vector<std::shared_ptr<Mesh>> meshes;
 };

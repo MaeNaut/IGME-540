@@ -72,7 +72,7 @@ int Mesh::GetTriangleCount()
 	return indexCount / 3;
 }
 
-void Mesh::Draw(float deltaTime, float totalTime)
+void Mesh::Draw()
 {
 	UINT stride = sizeof(Vertex);
 	UINT offset = 0;

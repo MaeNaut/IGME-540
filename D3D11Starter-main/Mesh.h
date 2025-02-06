@@ -22,6 +22,6 @@ public:
 	int GetIndexCount();
 	int GetVertexCount();
 	int GetTriangleCount();
-	void Draw(float deltaTime, float totalTime);
+	void Draw();
 };
 
