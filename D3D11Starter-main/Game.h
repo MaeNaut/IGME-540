@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Mesh.h"
+#include "GameEntity.h"
 
 #include <d3d11.h>
 #include <wrl/client.h>
@@ -57,4 +58,8 @@ private:
 	// Mesh Variables
 	std::shared_ptr<Mesh> mesh;
 	std::vector<std::shared_ptr<Mesh>> meshes;
+
+	// Entity variables
+	std::shared_ptr<GameEntity> entity;
+	std::vector<std::shared_ptr<GameEntity>> entities;
 };

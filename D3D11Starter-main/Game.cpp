@@ -23,7 +23,7 @@
 
 // For the DirectX Math library
 using namespace DirectX;
-Transform transform;
+//Transform transform;
 
 // --------------------------------------------------------
 // Called once per program, after the window and graphics API
@@ -74,9 +74,6 @@ void Game::Initialize()
 
 		Graphics::Device->CreateBuffer(&cbDesc, 0, constantBuffer.GetAddressOf());
 
-		// Actually bind the buffer
-		Graphics::Context->VSSetConstantBuffers(0, 1, constantBuffer.GetAddressOf());
-
 
 		// Initialize ImGui itself & platform/renderer backends
 		IMGUI_CHECKVERSION();
@@ -89,7 +86,7 @@ void Game::Initialize()
 		//ImGui::StyleColorsLight();
 		//ImGui::StyleColorsClassic();
 	}
-	transform = Transform();
+	//transform = Transform();
 }
 
 
@@ -193,9 +190,9 @@ void Game::CreateGeometry()
 	{
 		Vertex vertices[] =
 		{
-			{ XMFLOAT3(-0.5f, +0.0f, +0.0f), red },
-			{ XMFLOAT3(+0.0f, -0.5f, +0.0f), blue },
-			{ XMFLOAT3(-1.0f, -0.5f, +0.0f), green },
+			{ XMFLOAT3(+0.0f, +0.25f, +0.0f), red },
+			{ XMFLOAT3(+0.5f, -0.25f, +0.0f), blue },
+			{ XMFLOAT3(-0.5f, -0.25f, +0.0f), green },
 		};
 
 		unsigned int indices[] = { 0, 1, 2 };
@@ -211,12 +208,12 @@ void Game::CreateGeometry()
 	{
 		Vertex vertices[] =
 		{
+			{ XMFLOAT3(-0.3f, -0.1f, +0.0f), red },
 			{ XMFLOAT3(-0.3f, +0.1f, +0.0f), red },
-			{ XMFLOAT3(-0.3f, +0.3f, +0.0f), red },
+			{ XMFLOAT3(+0.0f, -0.1f, +0.0f), blue },
 			{ XMFLOAT3(+0.0f, +0.1f, +0.0f), blue },
-			{ XMFLOAT3(+0.0f, +0.3f, +0.0f), blue },
+			{ XMFLOAT3(+0.3f, -0.1f, +0.0f), green },
 			{ XMFLOAT3(+0.3f, +0.1f, +0.0f), green },
-			{ XMFLOAT3(+0.3f, +0.3f, +0.0f), green },
 		};
 
 		unsigned int indices[] = 
@@ -234,16 +231,16 @@ void Game::CreateGeometry()
 		meshes.push_back(mesh);
 	}
 
-	//Third Mesh
+	// Third Mesh
 	{
 		Vertex vertices[] =
 		{
-			{ XMFLOAT3(+0.6f, +0.2f, +0.0f), green },
-			{ XMFLOAT3(+0.4f, -0.1f, +0.0f), black },
-			{ XMFLOAT3(+0.8f, -0.1f, +0.0f), black },
-			{ XMFLOAT3(+0.6f, -0.1f, +0.0f), black },
-			{ XMFLOAT3(+0.4f, -0.4f, +0.0f), red },
-			{ XMFLOAT3(+0.8f, -0.4f, +0.0f), blue },
+			{ XMFLOAT3(+0.0f, +0.3f, +0.0f), green },
+			{ XMFLOAT3(-0.2f, +0.0f, +0.0f), black },
+			{ XMFLOAT3(+0.2f, +0.0f, +0.0f), black },
+			{ XMFLOAT3(+0.0f, +0.0f, +0.0f), black },
+			{ XMFLOAT3(-0.2f, -0.3f, +0.0f), red },
+			{ XMFLOAT3(+0.2f, -0.3f, +0.0f), blue },
 
 		};
 
@@ -261,6 +258,27 @@ void Game::CreateGeometry()
 		mesh = std::make_shared<Mesh>(vertices, indices, vertexCount, indexCount);
 		meshes.push_back(mesh);
 	}
+
+	// Create, place, and push_back each entity
+	entity = std::make_shared<GameEntity>(meshes[0]);
+	entity->GetTransform()->SetPosition(-0.4f, -0.2f, 0.0f);
+	entities.push_back(entity);
+
+	entity = std::make_shared<GameEntity>(meshes[1]);
+	entity->GetTransform()->SetPosition(-0.1f, 0.5f, 0.0f);
+	entities.push_back(entity);
+
+	entity = std::make_shared<GameEntity>(meshes[2]);
+	entity->GetTransform()->SetPosition(0.3f, 0.1f, 0.0f);
+	entities.push_back(entity);
+	
+	entity = std::make_shared<GameEntity>(meshes[2]);
+	entity->GetTransform()->SetPosition(0.5f, -0.3f, 0.0f);
+	entities.push_back(entity);
+
+	entity = std::make_shared<GameEntity>(meshes[2]);
+	entity->GetTransform()->SetPosition(0.7f, -0.7f, 0.0f);
+	entities.push_back(entity);
 }
 
 
@@ -286,12 +304,16 @@ void Game::Update(float deltaTime, float totalTime)
 		Window::Quit();
 
 	// Transform
-	transform.SetPosition(sin(totalTime), 0, 0);
-	transform.Rotate(0, 0, deltaTime);
+	float t = sin(totalTime * 10.0f) / 100.0f;
+	entities[0]->GetTransform()->MoveAbsolute(t, 0.0f, 0.0f);
 
 	float s = sin(totalTime) * 0.5f + 1.0f;
+	entities[1]->GetTransform()->SetScale(s, s, s);
 
-	transform.SetScale(s, s, s);
+	for (int i = 2; i < entities.size(); i++)
+	{
+		entities[i]->GetTransform()->Rotate(0, 0, deltaTime);
+	}
 }
 
 
@@ -310,49 +332,11 @@ void Game::Draw(float deltaTime, float totalTime)
 		Graphics::Context->ClearDepthStencilView(Graphics::DepthBufferDSV.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
 	}
 
-	// Constant buffer
+	// Entities
 	{
-		//// Rotate around Z based on time
-		//XMMATRIX trMat = XMMatrixTranslation(sin(totalTime), 0, 0);
-		//XMMATRIX rotZMat = XMMatrixRotationZ(totalTime);
-
-		//// Store the matrix before copy
-		//XMFLOAT4X4 tr;
-		//XMFLOAT4X4 rotZ;
-		//XMStoreFloat4x4(&tr, trMat);
-		//XMStoreFloat4x4(&rotZ, rotZMat);
-
-		// Collect the data locally
-		VertexShaderData dataToCopy = {};
-		dataToCopy.colorTint = colorTint;
-		dataToCopy.offset = offset;
-		// datatoCopy.transform = tr
-
-		// Temp
-		dataToCopy.worldMatrix = transform.GetWorldMatrix();
-
-		// Map() the buffer first
-		D3D11_MAPPED_SUBRESOURCE mapped = {};
-		Graphics::Context->Map(
-			constantBuffer.Get(),
-			0,
-			D3D11_MAP_WRITE_DISCARD,
-			0,
-			&mapped);
-
-		// Copy to GPU using memcpy
-		memcpy(mapped.pData, &dataToCopy, sizeof(VertexShaderData));
-
-		// Unmap when done
-		Graphics::Context->Unmap(constantBuffer.Get(), 0);
-	}
-
-	// DRAW geometry
-	// Loop through the game entities and draw each one
-	{
-		for (std::shared_ptr mesh : meshes)
+		for (std::shared_ptr ge : entities)
 		{
-			mesh->Draw();
+			ge->Draw(constantBuffer);
 		}
 	}
 
@@ -413,6 +397,7 @@ void Game::CustomUI()
 {
 	// Open the Custom window with a name of Inspector
 	ImGui::Begin("Inspector");
+	int id = 0;
 
 	if (ImGui::CollapsingHeader("App Details"))
 	{
@@ -444,19 +429,48 @@ void Game::CustomUI()
 	{
 		for (int i = 0; i < meshes.size(); i++)
 		{
-			// I couldn't find a way to generate the tree nodes of different names
-			// All attempts caused an error, so I put the indentations instead
-			ImGui::Text("Mesh %d: ", i);
-			ImGui::Text("\tTriangles: %d", meshes[i]->GetTriangleCount());
-			ImGui::Text("\tVertices:  %d", meshes[i]->GetVertexCount());
-			ImGui::Text("\tIndices:   %d", meshes[i]->GetIndexCount());
+			ImGui::PushID(id);
+			id++;
+			if (ImGui::TreeNode("", "Mesh %d", i + 1))
+			{
+				ImGui::Text("Triangles: %d", meshes[i]->GetTriangleCount());
+				ImGui::Text("Vertices:  %d", meshes[i]->GetVertexCount());
+				ImGui::Text("Indices:   %d", meshes[i]->GetIndexCount());
+				ImGui::TreePop();
+			}
+			ImGui::PopID();
 		}
 	}
 
-	if (ImGui::CollapsingHeader("Constant Buffer"))
+	//if (ImGui::CollapsingHeader("Constant Buffer"))
+	//{
+	//	ImGui::DragFloat3("Offset", &offset.x, 0.05f, 0.0f, 0.0f, "%.2f", 0);
+	//	ImGui::ColorEdit4("Mesh Color Tint", &colorTint.x);
+	//}
+
+	if (ImGui::CollapsingHeader("Scene Entities"))
 	{
-		ImGui::DragFloat3("Offset", &offset.x, 0.05f, 0.0f, 0.0f, "%.2f", 0);
-		ImGui::ColorEdit4("Mesh Color Tint", &colorTint.x);
+		for (int i = 0; i < entities.size(); i++)
+		{
+			ImGui::PushID(id);
+			id++;
+			if (ImGui::TreeNode("", "Entity %d", i + 1))
+			{
+				float a = entities[i]->GetTransform()->GetPosition().x;
+				ImGui::Text("position.x: %f", a);
+
+				// -----* Error note *-----
+				// Could not figure out how to convert XMFLOAT3 to float*
+				// without lvalue error and data corruption
+				
+				//ImGui::DragFloat3("Position", &entities[i]->GetTransform()->GetPosition().x);
+				//ImGui::DragFloat3("Rotation (Radians)", &entities[i]->GetTransform()->GetRotation().x);
+				//ImGui::DragFloat3("Scale##3", &entities[i]->GetTransform()->GetScale().x);
+				ImGui::Text("Mesh Index Count: %d", entities[i]->GetMesh()->GetIndexCount());
+				ImGui::TreePop();
+			}
+			ImGui::PopID();
+		}
 	}
 
 	ImGui::End();
