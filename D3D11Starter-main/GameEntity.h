@@ -2,6 +2,7 @@
 
 #include "Transform.h"
 #include "Mesh.h"
+#include "Camera.h"
 
 #include <memory>
 
@@ -16,7 +17,7 @@ public:
 	std::shared_ptr<Mesh> GetMesh();
 
 	// Draw Method
-	void Draw(Microsoft::WRL::ComPtr<ID3D11Buffer> &constantBuffer);
+	void Draw(Microsoft::WRL::ComPtr<ID3D11Buffer> &constantBuffer, std::shared_ptr<Camera> camera);
 
 private:
 	std::shared_ptr<Transform> transform;

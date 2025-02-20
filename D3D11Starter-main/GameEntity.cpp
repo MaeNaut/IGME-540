@@ -18,7 +18,7 @@ std::shared_ptr<Mesh> GameEntity::GetMesh()
 	return mesh;
 }
 
-void GameEntity::Draw(Microsoft::WRL::ComPtr<ID3D11Buffer> &constantBuffer)
+void GameEntity::Draw(Microsoft::WRL::ComPtr<ID3D11Buffer> &constantBuffer, std::shared_ptr<Camera> camera)
 {
 	// Actually bind the buffer
 	Graphics::Context->VSSetConstantBuffers(0, 1, constantBuffer.GetAddressOf());
@@ -29,6 +29,8 @@ void GameEntity::Draw(Microsoft::WRL::ComPtr<ID3D11Buffer> &constantBuffer)
 	VertexShaderData dataToCopy = {};
 	dataToCopy.colorTint = colorTint;
 	dataToCopy.world = transform->GetWorldMatrix();
+	dataToCopy.view = camera->GetView();
+	dataToCopy.projection = camera->GetProjection();
 
 	// Map() the buffer first
 	D3D11_MAPPED_SUBRESOURCE mapped = {};

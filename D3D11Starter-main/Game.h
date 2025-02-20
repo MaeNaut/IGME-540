@@ -2,6 +2,7 @@
 
 #include "Mesh.h"
 #include "GameEntity.h"
+#include "Camera.h"
 
 #include <d3d11.h>
 #include <wrl/client.h>
@@ -48,18 +49,22 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11Buffer> constantBuffer;
 
 
-	// Variables for UI
+	// fields for UI
 	bool show_demo_window = true;
 	int zipCode = 00501;
 	DirectX::XMFLOAT4 bgColor = { 1.0f, 1.0f, 1.0f, 1.0f };
 	DirectX::XMFLOAT3 offset = { 0.2f, 0.0f, 0.0f };
 	DirectX::XMFLOAT4 colorTint = { 1.0f, 0.5f, 0.5f, 1.0f };
 
-	// Mesh Variables
+	// Mesh fields
 	std::shared_ptr<Mesh> mesh;
 	std::vector<std::shared_ptr<Mesh>> meshes;
 
-	// Entity variables
+	// Entity fields
 	std::shared_ptr<GameEntity> entity;
 	std::vector<std::shared_ptr<GameEntity>> entities;
+
+	// Camera fields
+	std::shared_ptr<Camera> camera;
+	std::vector<std::shared_ptr<Camera>> cameras;
 };

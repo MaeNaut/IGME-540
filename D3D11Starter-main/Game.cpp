@@ -86,7 +86,14 @@ void Game::Initialize()
 		//ImGui::StyleColorsLight();
 		//ImGui::StyleColorsClassic();
 	}
-	//transform = Transform();
+	
+	// Create the camera for game
+	camera = std::make_shared<Camera>(Window::AspectRatio(), 0, 0, -5, 45, true);
+	cameras.push_back(camera);
+	camera = std::make_shared<Camera>(Window::AspectRatio(), 2, 0, -2, 60, false);
+	cameras.push_back(camera);
+	camera = std::make_shared<Camera>(Window::AspectRatio(), -1, 1, -2, 90, false);
+	cameras.push_back(camera);
 }
 
 
@@ -288,6 +295,10 @@ void Game::CreateGeometry()
 // --------------------------------------------------------
 void Game::OnResize()
 {
+	for (std::shared_ptr cam : cameras)
+	{
+		if (camera != nullptr) { camera->UpdateProjectionMatrix(Window::AspectRatio()); }
+	}
 }
 
 
@@ -314,6 +325,15 @@ void Game::Update(float deltaTime, float totalTime)
 	{
 		entities[i]->GetTransform()->Rotate(0, 0, deltaTime);
 	}
+
+	// Camera
+	for (std::shared_ptr cam : cameras)
+	{
+		if (cam->IsActive())
+		{
+			cam->Update(deltaTime);
+		}
+	}
 }
 
 
@@ -334,9 +354,15 @@ void Game::Draw(float deltaTime, float totalTime)
 
 	// Entities
 	{
-		for (std::shared_ptr ge : entities)
+		for (std::shared_ptr cam : cameras)
 		{
-			ge->Draw(constantBuffer);
+			if (cam->IsActive())
+			{
+				for (std::shared_ptr ge : entities)
+				{
+					ge->Draw(constantBuffer, cam);
+				}
+			}
 		}
 	}
 
@@ -399,6 +425,7 @@ void Game::CustomUI()
 	ImGui::Begin("Inspector");
 	int id = 0;
 
+	// Display app details
 	if (ImGui::CollapsingHeader("App Details"))
 	{
 		// Show the framerate and window dimensions
@@ -425,13 +452,14 @@ void Game::CustomUI()
 		ImGui::SliderInt("ZIP Code", &zipCode, 00501, 99734);
 	}
 
+	// Mesh UI
 	if (ImGui::CollapsingHeader("Meshes"))
 	{
 		for (int i = 0; i < meshes.size(); i++)
 		{
 			ImGui::PushID(id);
 			id++;
-			if (ImGui::TreeNode("", "Mesh %d", i + 1))
+			if (ImGui::TreeNode("", "Mesh %d", i))
 			{
 				ImGui::Text("Triangles: %d", meshes[i]->GetTriangleCount());
 				ImGui::Text("Vertices:  %d", meshes[i]->GetVertexCount());
@@ -448,28 +476,77 @@ void Game::CustomUI()
 	//	ImGui::ColorEdit4("Mesh Color Tint", &colorTint.x);
 	//}
 
+	// Entity UI
 	if (ImGui::CollapsingHeader("Scene Entities"))
 	{
 		for (int i = 0; i < entities.size(); i++)
 		{
 			ImGui::PushID(id);
 			id++;
-			if (ImGui::TreeNode("", "Entity %d", i + 1))
+			if (ImGui::TreeNode("", "Entity %d", i))
 			{
-				float a = entities[i]->GetTransform()->GetPosition().x;
-				ImGui::Text("position.x: %f", a);
+				XMFLOAT3 position = entities[i]->GetTransform()->GetPosition();
+				XMFLOAT3 rotation = entities[i]->GetTransform()->GetRotation();
+				XMFLOAT3 scale = entities[i]->GetTransform()->GetScale();
 
-				// -----* Error note *-----
-				// Could not figure out how to convert XMFLOAT3 to float*
-				// without lvalue error and data corruption
-				
-				//ImGui::DragFloat3("Position", &entities[i]->GetTransform()->GetPosition().x);
-				//ImGui::DragFloat3("Rotation (Radians)", &entities[i]->GetTransform()->GetRotation().x);
-				//ImGui::DragFloat3("Scale##3", &entities[i]->GetTransform()->GetScale().x);
+				if (ImGui::DragFloat3("Position", &position.x, 0.005f))
+				{
+					entities[i]->GetTransform()->SetPosition(position);
+				}
+				if (ImGui::DragFloat3("Rotation (Radians)", &rotation.x, 0.005f))
+				{
+					entities[i]->GetTransform()->SetRotation(rotation);
+				}
+				if (ImGui::DragFloat3("Scale", &scale.x, 0.005f))
+				{
+					entities[i]->GetTransform()->SetScale(scale);
+				}
+
 				ImGui::Text("Mesh Index Count: %d", entities[i]->GetMesh()->GetIndexCount());
 				ImGui::TreePop();
 			}
 			ImGui::PopID();
+		}
+	}
+
+	// Camera UI
+	if (ImGui::CollapsingHeader("Camera details"))
+	{
+		// Choose which camera to be activated
+		static int e = 0;
+		if (ImGui::RadioButton("Camera 0", &e, 0))
+		{
+			cameras[0]->IsActive(true);
+			cameras[1]->IsActive(false);
+			cameras[2]->IsActive(false);
+		}	ImGui::SameLine();
+		if (ImGui::RadioButton("Camera 1", &e, 1))
+		{
+			cameras[0]->IsActive(false);
+			cameras[1]->IsActive(true);
+			cameras[2]->IsActive(false);
+		}	ImGui::SameLine();
+		if (ImGui::RadioButton("Camera 2", &e, 2))
+		{
+			cameras[0]->IsActive(false);
+			cameras[1]->IsActive(false);
+			cameras[2]->IsActive(true);
+		}
+
+		// Display the information of activated camera
+		for (std::shared_ptr cam : cameras)
+		{
+			if (cam->IsActive())
+			{
+				XMFLOAT3 position = cam->GetTransform()->GetPosition();
+				XMFLOAT3 rotation = cam->GetTransform()->GetRotation();
+
+				ImGui::Text("Position:     %.3f, %.3f, %.3f", position.x, position.y, position.z);
+				ImGui::Text("Direction:    %.3f, %.3f, %.3f", rotation.x, rotation.y, rotation.z);
+				ImGui::Text("FOV (Degree): %.3f", cam->GetFov());
+				ImGui::Text("Near Plane:   %.3f", cam->GetNearZ());
+				ImGui::Text("Far Plane:    %.3f", cam->GetFarZ());
+			}
 		}
 	}
 
