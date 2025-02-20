@@ -1,4 +1,9 @@
 
+cbuffer DataFromCPP : register(b0)
+{
+	float time;
+}
+
 cbuffer ExternalData : register(b0)
 {
     float4 colorTint;

@@ -74,10 +74,4 @@ int Mesh::GetTriangleCount()
 
 void Mesh::Draw()
 {
-	UINT stride = sizeof(Vertex);
-	UINT offset = 0;
-	Graphics::Context->IASetVertexBuffers(0, 1, vertexBuffer.GetAddressOf(), &stride, &offset);
-	Graphics::Context->IASetIndexBuffer(indexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
-
-	Graphics::Context->DrawIndexed(indexCount, 0, 0);
 }
