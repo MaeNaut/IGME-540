@@ -15,6 +15,7 @@ private:
 public:
 	Mesh() = default;
 	Mesh(Vertex vertices[], unsigned int indices[], int _vertexCount, int _indexCount);
+	Mesh(const char* objFile);
 	~Mesh();
 
 	Microsoft::WRL::ComPtr<ID3D11Buffer> GetVertexBuffer();

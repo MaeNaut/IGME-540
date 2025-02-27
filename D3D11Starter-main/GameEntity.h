@@ -11,12 +11,15 @@ class GameEntity
 {
 public:
 	GameEntity() = default;
-	GameEntity(std::shared_ptr<Mesh> _mesh);
+	GameEntity(std::shared_ptr<Mesh> _mesh, std::shared_ptr<Material> _material);
 
 	// Getters
 	std::shared_ptr<Transform> GetTransform();
 	std::shared_ptr<Mesh> GetMesh();
 	std::shared_ptr<Material> GetMaterial();
+
+	// Setters
+	void SetMaterial(std::shared_ptr<Material> _material);
 
 	// Draw Method
 	void Draw(std::shared_ptr<Camera> camera);

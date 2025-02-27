@@ -1,11 +1,11 @@
 #include "GameEntity.h"
 #include "Graphics.h"
-#include "BufferStructs.h"
 
-GameEntity::GameEntity(std::shared_ptr<Mesh> _mesh)
+GameEntity::GameEntity(std::shared_ptr<Mesh> _mesh, std::shared_ptr<Material> _material)
 {
 	transform = std::make_shared<Transform>();
 	mesh = _mesh;
+	material = _material;
 }
 
 std::shared_ptr<Transform> GameEntity::GetTransform()
@@ -23,15 +23,29 @@ std::shared_ptr<Material> GameEntity::GetMaterial()
 	return material;
 }
 
+void GameEntity::SetMaterial(std::shared_ptr<Material> _material)
+{
+	material = _material;
+}
+
 void GameEntity::Draw(std::shared_ptr<Camera> camera)
 {
 	// Collect the data locally
 	DirectX::XMFLOAT4 colorTint = { 1.0f, 1.0f, 1.0f, 1.0f };
-	VertexShaderData dataToCopy = {};
-	dataToCopy.colorTint = colorTint;
-	dataToCopy.world = transform->GetWorldMatrix();
-	dataToCopy.view = camera->GetView();
-	dataToCopy.projection = camera->GetProjection();
+
+	// Prepare the data for GPU
+	std::shared_ptr<SimpleVertexShader> vs = material->GetVS();
+
+	vs->SetFloat4("colorTint", material->GetColorTint()); // Strings here MUST
+	vs->SetMatrix4x4("world", transform->GetWorldMatrix()); // match variable
+	vs->SetMatrix4x4("view", camera->GetView()); // names in your
+	vs->SetMatrix4x4("projection", camera->GetProjection()); // shader’s cbuffer!
+
+	vs->CopyAllBufferData(); // Adjust the “vs” variable here as necessary
+
+	// Activate the shader for entity
+	material->GetVS()->SetShader();
+	material->GetPS()->SetShader();
 
 	// Draw the entity
 	mesh->Draw();

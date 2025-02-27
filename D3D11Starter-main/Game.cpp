@@ -4,7 +4,6 @@
 #include "Input.h"
 #include "PathHelpers.h"
 #include "Window.h"
-#include "BufferStructs.h"
 #include "Transform.h"
 #include "Material.h"
 
@@ -34,7 +33,6 @@ void Game::Initialize()
 	// Helper methods for loading shaders, creating some basic
 	// geometry to draw and some simple camera matrices.
 	//  - You'll be expanding and/or replacing these later
-	LoadShaders();
 	CreateGeometry();
 
 
@@ -86,19 +84,6 @@ Game::~Game()
 
 
 // --------------------------------------------------------
-// Loads shaders from compiled shader object (.cso) files
-// and also created the Input Layout that describes our 
-// vertex data to the rendering pipeline. 
-// - Input Layout creation is done here because it must 
-//    be verified against vertex shader byte code
-// - We'll have that byte code already loaded below
-// --------------------------------------------------------
-void Game::LoadShaders()
-{
-}
-
-
-// --------------------------------------------------------
 // Creates the geometry we're going to draw
 // --------------------------------------------------------
 void Game::CreateGeometry()
@@ -108,78 +93,78 @@ void Game::CreateGeometry()
 	XMFLOAT4 blue = XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f);
 	XMFLOAT4 black = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
 
-	// First Mesh
-	{
-		Vertex vertices[] =
-		{
-			{ XMFLOAT3(+0.0f, +0.25f, +0.0f), red },
-			{ XMFLOAT3(+0.5f, -0.25f, +0.0f), blue },
-			{ XMFLOAT3(-0.5f, -0.25f, +0.0f), green },
-		};
+	//// First Mesh
+	//{
+	//	Vertex vertices[] =
+	//	{
+	//		{ XMFLOAT3(+0.0f, +0.25f, +0.0f), red },
+	//		{ XMFLOAT3(+0.5f, -0.25f, +0.0f), blue },
+	//		{ XMFLOAT3(-0.5f, -0.25f, +0.0f), green },
+	//	};
 
-		unsigned int indices[] = { 0, 1, 2 };
+	//	unsigned int indices[] = { 0, 1, 2 };
 
-		int vertexCount = sizeof(vertices) / sizeof(vertices[0]);
-		int indexCount = sizeof(indices) / sizeof(indices[0]);
+	//	int vertexCount = sizeof(vertices) / sizeof(vertices[0]);
+	//	int indexCount = sizeof(indices) / sizeof(indices[0]);
 
-		mesh = std::make_shared<Mesh>(vertices, indices, vertexCount, indexCount);
-		meshes.push_back(mesh);
-	}
+	//	mesh = std::make_shared<Mesh>(vertices, indices, vertexCount, indexCount);
+	//	meshes.push_back(mesh);
+	//}
 
-	// Second Mesh
-	{
-		Vertex vertices[] =
-		{
-			{ XMFLOAT3(-0.3f, -0.1f, +0.0f), red },
-			{ XMFLOAT3(-0.3f, +0.1f, +0.0f), red },
-			{ XMFLOAT3(+0.0f, -0.1f, +0.0f), blue },
-			{ XMFLOAT3(+0.0f, +0.1f, +0.0f), blue },
-			{ XMFLOAT3(+0.3f, -0.1f, +0.0f), green },
-			{ XMFLOAT3(+0.3f, +0.1f, +0.0f), green },
-		};
+	//// Second Mesh
+	//{
+	//	Vertex vertices[] =
+	//	{
+	//		{ XMFLOAT3(-0.3f, -0.1f, +0.0f), red },
+	//		{ XMFLOAT3(-0.3f, +0.1f, +0.0f), red },
+	//		{ XMFLOAT3(+0.0f, -0.1f, +0.0f), blue },
+	//		{ XMFLOAT3(+0.0f, +0.1f, +0.0f), blue },
+	//		{ XMFLOAT3(+0.3f, -0.1f, +0.0f), green },
+	//		{ XMFLOAT3(+0.3f, +0.1f, +0.0f), green },
+	//	};
 
-		unsigned int indices[] = 
-		{
-			0, 1, 2,
-			2, 1, 3,
-			2, 3, 4,
-			4, 3, 5
-		};
+	//	unsigned int indices[] = 
+	//	{
+	//		0, 1, 2,
+	//		2, 1, 3,
+	//		2, 3, 4,
+	//		4, 3, 5
+	//	};
 
-		int vertexCount = sizeof(vertices) / sizeof(vertices[0]);
-		int indexCount = sizeof(indices) / sizeof(indices[0]);
+	//	int vertexCount = sizeof(vertices) / sizeof(vertices[0]);
+	//	int indexCount = sizeof(indices) / sizeof(indices[0]);
 
-		mesh = std::make_shared<Mesh>(vertices, indices, vertexCount, indexCount);
-		meshes.push_back(mesh);
-	}
+	//	mesh = std::make_shared<Mesh>(vertices, indices, vertexCount, indexCount);
+	//	meshes.push_back(mesh);
+	//}
 
-	// Third Mesh
-	{
-		Vertex vertices[] =
-		{
-			{ XMFLOAT3(+0.0f, +0.3f, +0.0f), green },
-			{ XMFLOAT3(-0.2f, +0.0f, +0.0f), black },
-			{ XMFLOAT3(+0.2f, +0.0f, +0.0f), black },
-			{ XMFLOAT3(+0.0f, +0.0f, +0.0f), black },
-			{ XMFLOAT3(-0.2f, -0.3f, +0.0f), red },
-			{ XMFLOAT3(+0.2f, -0.3f, +0.0f), blue },
+	//// Third Mesh
+	//{
+	//	Vertex vertices[] =
+	//	{
+	//		{ XMFLOAT3(+0.0f, +0.3f, +0.0f), green },
+	//		{ XMFLOAT3(-0.2f, +0.0f, +0.0f), black },
+	//		{ XMFLOAT3(+0.2f, +0.0f, +0.0f), black },
+	//		{ XMFLOAT3(+0.0f, +0.0f, +0.0f), black },
+	//		{ XMFLOAT3(-0.2f, -0.3f, +0.0f), red },
+	//		{ XMFLOAT3(+0.2f, -0.3f, +0.0f), blue },
 
-		};
+	//	};
 
-		unsigned int indices[] =
-		{
-			1, 0, 3,
-			3, 0, 2,
-			4, 1, 3,
-			5, 3, 2
-		};
+	//	unsigned int indices[] =
+	//	{
+	//		1, 0, 3,
+	//		3, 0, 2,
+	//		4, 1, 3,
+	//		5, 3, 2
+	//	};
 
-		int vertexCount = sizeof(vertices) / sizeof(vertices[0]);
-		int indexCount = sizeof(indices) / sizeof(indices[0]);
+	//	int vertexCount = sizeof(vertices) / sizeof(vertices[0]);
+	//	int indexCount = sizeof(indices) / sizeof(indices[0]);
 
-		mesh = std::make_shared<Mesh>(vertices, indices, vertexCount, indexCount);
-		meshes.push_back(mesh);
-	}
+	//	mesh = std::make_shared<Mesh>(vertices, indices, vertexCount, indexCount);
+	//	meshes.push_back(mesh);
+	//}
 
 	// Load shaders
 	std::shared_ptr<SimpleVertexShader> vs = std::make_shared<SimpleVertexShader>(
@@ -188,29 +173,30 @@ void Game::CreateGeometry()
 		Graphics::Device, Graphics::Context, FixPath(L"PixelShader.cso").c_str());
 
 
-	// Create materials
-	std::shared_ptr<Material> mat = std::make_shared<Material>(vs, ps);
+	// Create materials, MUST be done before creating entities
+	DirectX::XMFLOAT4 colorTint(1.0f, 1.0f, 1.0f, 1.0f);
+	std::shared_ptr<Material> mat = std::make_shared<Material>(colorTint, vs, ps);
 
-	// Create, place, and push_back each entity
-	entity = std::make_shared<GameEntity>(meshes[0]);
-	entity->GetTransform()->SetPosition(-0.4f, -0.2f, 0.0f);
-	entities.push_back(entity);
+	//// Create, place, and push_back each entity
+	//entity = std::make_shared<GameEntity>(meshes[0], mat);
+	//entity->GetTransform()->SetPosition(-0.4f, -0.2f, 0.0f);
+	//entities.push_back(entity);
 
-	entity = std::make_shared<GameEntity>(meshes[1]);
-	entity->GetTransform()->SetPosition(-0.1f, 0.5f, 0.0f);
-	entities.push_back(entity);
+	//entity = std::make_shared<GameEntity>(meshes[1], mat);
+	//entity->GetTransform()->SetPosition(-0.1f, 0.5f, 0.0f);
+	//entities.push_back(entity);
 
-	entity = std::make_shared<GameEntity>(meshes[2]);
-	entity->GetTransform()->SetPosition(0.3f, 0.1f, 0.0f);
-	entities.push_back(entity);
-	
-	entity = std::make_shared<GameEntity>(meshes[2]);
-	entity->GetTransform()->SetPosition(0.5f, -0.3f, 0.0f);
-	entities.push_back(entity);
+	//entity = std::make_shared<GameEntity>(meshes[2], mat);
+	//entity->GetTransform()->SetPosition(0.3f, 0.1f, 0.0f);
+	//entities.push_back(entity);
+	//
+	//entity = std::make_shared<GameEntity>(meshes[2], mat);
+	//entity->GetTransform()->SetPosition(0.5f, -0.3f, 0.0f);
+	//entities.push_back(entity);
 
-	entity = std::make_shared<GameEntity>(meshes[2]);
-	entity->GetTransform()->SetPosition(0.7f, -0.7f, 0.0f);
-	entities.push_back(entity);
+	//entity = std::make_shared<GameEntity>(meshes[2], mat);
+	//entity->GetTransform()->SetPosition(0.7f, -0.7f, 0.0f);
+	//entities.push_back(entity);
 }
 
 
@@ -285,24 +271,24 @@ void Game::Draw(float deltaTime, float totalTime)
 			{
 				for (std::shared_ptr ge : entities)
 				{
-					std::shared_ptr<SimpleVertexShader> vs = ge->GetMaterial()->GetVS();
-					std::shared_ptr<SimplePixelShader> ps = ge->GetMaterial()->GetPS();
-					
-					// Set up the pipeline for this entity (and mesh)
-					vs->SetShader();
-					ps->SetShader();
+					//std::shared_ptr<SimpleVertexShader> vs = ge->GetMaterial()->GetVS();
+					//std::shared_ptr<SimplePixelShader> ps = ge->GetMaterial()->GetPS();
+					//
+					//// Set up the pipeline for this entity (and mesh)
+					//vs->SetShader();
+					//ps->SetShader();
 
-					// Collect data for the vertex shader
-					vs->SetMatrix4x4("world", ge->GetTransform()->GetWorldMatrix());
-					vs->SetMatrix4x4("view", cam->GetView());
-					vs->SetMatrix4x4("projection", cam->GetProjection());
+					//// Collect data for the vertex shader
+					//vs->SetMatrix4x4("world", ge->GetTransform()->GetWorldMatrix());
+					//vs->SetMatrix4x4("view", cam->GetView());
+					//vs->SetMatrix4x4("projection", cam->GetProjection());
 
-					// Copy data to constant buffers
-					vs->CopyAllBufferData();
+					//// Copy data to constant buffers
+					//vs->CopyAllBufferData();
 
-					// Same for the pixel shader
-					ps->SetFloat("Time", totalTime);
-					ps->CopyAllBufferData();
+					//// Same for the pixel shader
+					//ps->SetFloat("Time", totalTime);
+					//ps->CopyAllBufferData();
 
 					ge->Draw(cam);
 				}
