@@ -33,19 +33,23 @@ void GameEntity::Draw(std::shared_ptr<Camera> camera)
 	// Collect the data locally
 	DirectX::XMFLOAT4 colorTint = { 1.0f, 1.0f, 1.0f, 1.0f };
 
-	// Prepare the data for GPU
-	std::shared_ptr<SimpleVertexShader> vs = material->GetVS();
-
-	vs->SetFloat4("colorTint", material->GetColorTint()); // Strings here MUST
-	vs->SetMatrix4x4("world", transform->GetWorldMatrix()); // match variable
-	vs->SetMatrix4x4("view", camera->GetView()); // names in your
-	vs->SetMatrix4x4("projection", camera->GetProjection()); // shader’s cbuffer!
-
-	vs->CopyAllBufferData(); // Adjust the “vs” variable here as necessary
-
 	// Activate the shader for entity
 	material->GetVS()->SetShader();
 	material->GetPS()->SetShader();
+
+	// Prepare the data for GPU
+	std::shared_ptr<SimpleVertexShader> vs = material->GetVS();
+	std::shared_ptr<SimplePixelShader> ps = material->GetPS();
+
+	vs->SetMatrix4x4("world", transform->GetWorldMatrix());
+	vs->SetMatrix4x4("view", camera->GetView());
+	vs->SetMatrix4x4("projection", camera->GetProjection());
+
+	vs->CopyAllBufferData(); // Adjust the “vs” variable here as necessary
+
+	// Same for the pixel shader
+	ps->SetFloat4("colorTint", material->GetColorTint());
+	ps->CopyAllBufferData();
 
 	// Draw the entity
 	mesh->Draw();

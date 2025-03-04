@@ -177,6 +177,11 @@ void Game::CreateGeometry()
 	DirectX::XMFLOAT4 colorTint(1.0f, 1.0f, 1.0f, 1.0f);
 	std::shared_ptr<Material> mat = std::make_shared<Material>(colorTint, vs, ps);
 
+	
+
+	entity = std::make_shared<GameEntity>(std::make_shared<Mesh>(FixPath("../../Assets/Models/sphere.obj").c_str()), mat);
+	entities.push_back(entity);
+
 	//// Create, place, and push_back each entity
 	//entity = std::make_shared<GameEntity>(meshes[0], mat);
 	//entity->GetTransform()->SetPosition(-0.4f, -0.2f, 0.0f);
@@ -225,17 +230,17 @@ void Game::Update(float deltaTime, float totalTime)
 	if (Input::KeyDown(VK_ESCAPE))
 		Window::Quit();
 
-	// Transform
-	float t = sin(totalTime * 10.0f) / 100.0f;
-	entities[0]->GetTransform()->MoveAbsolute(t, 0.0f, 0.0f);
+	//// Transform
+	//float t = sin(totalTime * 10.0f) / 100.0f;
+	//entities[0]->GetTransform()->MoveAbsolute(t, 0.0f, 0.0f);
 
-	float s = sin(totalTime) * 0.5f + 1.0f;
-	entities[1]->GetTransform()->SetScale(s, s, s);
+	//float s = sin(totalTime) * 0.5f + 1.0f;
+	//entities[1]->GetTransform()->SetScale(s, s, s);
 
-	for (int i = 2; i < entities.size(); i++)
-	{
-		entities[i]->GetTransform()->Rotate(0, 0, deltaTime);
-	}
+	//for (int i = 2; i < entities.size(); i++)
+	//{
+	//	entities[i]->GetTransform()->Rotate(0, 0, deltaTime);
+	//}
 
 	// Camera
 	for (std::shared_ptr cam : cameras)

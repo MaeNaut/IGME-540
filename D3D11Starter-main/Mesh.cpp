@@ -261,6 +261,9 @@ Mesh::Mesh(const char* objFile)
 		}
 	}
 
+	indexCount = indexCounter;
+	vertexCount = vertCounter;
+
 	// Close the file and create the actual buffers
 	obj.close();
 
