@@ -6,6 +6,7 @@
 #include "Window.h"
 #include "Transform.h"
 #include "Material.h"
+//#include “WICTextureLoader.h”
 
 // Needed for a helper function to load pre-compiled shader files
 #pragma comment(lib, "d3dcompiler.lib")
@@ -35,6 +36,7 @@ void Game::Initialize()
 	//  - You'll be expanding and/or replacing these later
 	CreateGeometry();
 
+	//DirectX::CreateWICTextureFromFile();
 
 	// Set initial graphics API state
 	//  - These settings persist until we change them
@@ -58,13 +60,25 @@ void Game::Initialize()
 		//ImGui::StyleColorsClassic();
 	}
 	
-	// Create the camera for game
+
+	// Create the cameras for game
 	camera = std::make_shared<Camera>(Window::AspectRatio(), 0, 0, -20, 45, true);
 	cameras.push_back(camera);
 	camera = std::make_shared<Camera>(Window::AspectRatio(), 2, 0, -2, 60, false);
 	cameras.push_back(camera);
 	camera = std::make_shared<Camera>(Window::AspectRatio(), -1, 1, -2, 90, false);
 	cameras.push_back(camera);
+
+
+	// Create a sampler
+	D3D11_SAMPLER_DESC sampDesc{};
+	sampDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+	sampDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+	sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+	sampDesc.Filter = D3D11_FILTER_ANISOTROPIC;
+	sampDesc.MaxAnisotropy = 16;
+	sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
+	Graphics::Device->CreateSamplerState(&sampDesc, sampler.GetAddressOf());
 }
 
 
@@ -204,9 +218,9 @@ void Game::Update(float deltaTime, float totalTime)
 		Window::Quit();
 
 	// Rotate the entities every frame
-	for (int i = 0; i < entities.size(); i++)
+	for (std::shared_ptr<GameEntity> ge : entities)
 	{
-		entities[i]->GetTransform()->Rotate(0, deltaTime, 0);
+		ge->GetTransform()->Rotate(0, deltaTime, 0);
 	}
 
 	// Camera
@@ -235,14 +249,18 @@ void Game::Draw(float deltaTime, float totalTime)
 		Graphics::Context->ClearDepthStencilView(Graphics::DepthBufferDSV.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
 	}
 
-	// Entities
+	// Draw Geometry
 	{
+		// Entities
 		for (std::shared_ptr cam : cameras)
 		{
 			if (cam->IsActive())
 			{
 				for (std::shared_ptr ge : entities)
 				{
+					//ge->GetMaterial()->GetPS()->SetShaderResourceView();
+					//ge->GetMaterial()->GetPS()->SetSamplerState("BasicSampler", );
+
 					ge->Draw(cam);
 				}
 			}

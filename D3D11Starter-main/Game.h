@@ -57,4 +57,7 @@ private:
 	// Camera fields
 	std::shared_ptr<Camera> camera;
 	std::vector<std::shared_ptr<Camera>> cameras;
+
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> textureSRV;
+	Microsoft::WRL::ComPtr<ID3D11SamplerState> sampler;
 };
