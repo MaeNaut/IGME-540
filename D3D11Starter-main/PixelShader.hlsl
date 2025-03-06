@@ -38,5 +38,5 @@ float4 main(VertexToPixel input) : SV_TARGET
 	//   of the triangle we're rendering
 	
 	// return float4(input.uv, 0, 1);
-	return float4(input.normal, 1);
+	return float4(1, 1, 1, 1) * colorTint;
 }

@@ -18,11 +18,16 @@ public:
 	Mesh(const char* objFile);
 	~Mesh();
 
+	// Getters
 	Microsoft::WRL::ComPtr<ID3D11Buffer> GetVertexBuffer();
 	Microsoft::WRL::ComPtr<ID3D11Buffer> GetIndexBuffer();
 	int GetIndexCount();
 	int GetVertexCount();
 	int GetTriangleCount();
+
+	// Helper function
+	void CreateBuffer(Vertex vertices[], unsigned int indices[]);
+
 	void Draw();
 };
 

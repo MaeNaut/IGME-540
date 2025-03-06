@@ -81,12 +81,12 @@ void Camera::IsActive(bool _isActive)
 void Camera::Update(float deltaTime)
 {
 	// Keyboard Input
-	if (Input::KeyDown('W')) { transform->MoveRelative(0, 0, deltaTime); }		// Forward
-	if (Input::KeyDown('S')) { transform->MoveRelative(0, 0, -deltaTime); }		// Backward
-	if (Input::KeyDown('A')) { transform->MoveRelative(-deltaTime, 0, 0); }		// Left
-	if (Input::KeyDown('D')) { transform->MoveRelative(deltaTime, 0, 0); }		// Right
-	if (Input::KeyDown(VK_SPACE)) { transform->MoveAbsolute(0, deltaTime, 0); }	// Up
-	if (Input::KeyDown('X')) { transform->MoveAbsolute(0, -deltaTime, 0); }		// Down
+	if (Input::KeyDown('W')) { transform->MoveRelative(0, 0, deltaTime * 5); }		// Forward
+	if (Input::KeyDown('S')) { transform->MoveRelative(0, 0, -deltaTime * 5); }		// Backward
+	if (Input::KeyDown('A')) { transform->MoveRelative(-deltaTime * 5, 0, 0); }		// Left
+	if (Input::KeyDown('D')) { transform->MoveRelative(deltaTime * 5, 0, 0); }		// Right
+	if (Input::KeyDown(VK_SPACE)) { transform->MoveAbsolute(0, deltaTime * 5, 0); }	// Up
+	if (Input::KeyDown('X')) { transform->MoveAbsolute(0, -deltaTime * 5, 0); }		// Down
 
 	// Mouse Input
 	if (Input::MouseLeftDown())

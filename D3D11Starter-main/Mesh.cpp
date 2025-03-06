@@ -12,38 +12,7 @@ Mesh::Mesh(Vertex vertices[], unsigned int indices[], int _vertexCount, int _ind
 {
 	vertexCount = _vertexCount;
 	indexCount = _indexCount;
-
-	// Create a VERTEX BUFFER
-	{
-		D3D11_BUFFER_DESC vbd = {};
-		vbd.Usage = D3D11_USAGE_IMMUTABLE;
-		vbd.ByteWidth = sizeof(Vertex) * vertexCount;
-		vbd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-		vbd.CPUAccessFlags = 0;
-		vbd.MiscFlags = 0;
-		vbd.StructureByteStride = 0;
-
-		D3D11_SUBRESOURCE_DATA initialVertexData = {};
-		initialVertexData.pSysMem = vertices;
-
-		Graphics::Device->CreateBuffer(&vbd, &initialVertexData, vertexBuffer.GetAddressOf());
-	}
-
-	// Create an INDEX BUFFER
-	{
-		D3D11_BUFFER_DESC ibd = {};
-		ibd.Usage = D3D11_USAGE_IMMUTABLE;
-		ibd.ByteWidth = sizeof(unsigned int) * indexCount;
-		ibd.BindFlags = D3D11_BIND_INDEX_BUFFER;
-		ibd.CPUAccessFlags = 0;
-		ibd.MiscFlags = 0;
-		ibd.StructureByteStride = 0;
-
-		D3D11_SUBRESOURCE_DATA initialIndexData = {};
-		initialIndexData.pSysMem = indices;
-
-		Graphics::Device->CreateBuffer(&ibd, &initialIndexData, indexBuffer.GetAddressOf());
-	}
+	CreateBuffer(vertices, indices);
 }
 
 Mesh::Mesh(const char* objFile)
@@ -263,6 +232,7 @@ Mesh::Mesh(const char* objFile)
 
 	indexCount = indexCounter;
 	vertexCount = vertCounter;
+	CreateBuffer(&verts[0], &indices[0]);
 
 	// Close the file and create the actual buffers
 	obj.close();
@@ -335,6 +305,47 @@ int Mesh::GetTriangleCount()
 	return indexCount / 3;
 }
 
+void Mesh::CreateBuffer(Vertex vertices[], unsigned int indices[])
+{
+	// Create a VERTEX BUFFER
+	{
+		D3D11_BUFFER_DESC vbd = {};
+		vbd.Usage = D3D11_USAGE_IMMUTABLE;
+		vbd.ByteWidth = sizeof(Vertex) * vertexCount;
+		vbd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+		vbd.CPUAccessFlags = 0;
+		vbd.MiscFlags = 0;
+		vbd.StructureByteStride = 0;
+
+		D3D11_SUBRESOURCE_DATA initialVertexData = {};
+		initialVertexData.pSysMem = vertices;
+
+		Graphics::Device->CreateBuffer(&vbd, &initialVertexData, vertexBuffer.GetAddressOf());
+	}
+
+	// Create an INDEX BUFFER
+	{
+		D3D11_BUFFER_DESC ibd = {};
+		ibd.Usage = D3D11_USAGE_IMMUTABLE;
+		ibd.ByteWidth = sizeof(unsigned int) * indexCount;
+		ibd.BindFlags = D3D11_BIND_INDEX_BUFFER;
+		ibd.CPUAccessFlags = 0;
+		ibd.MiscFlags = 0;
+		ibd.StructureByteStride = 0;
+
+		D3D11_SUBRESOURCE_DATA initialIndexData = {};
+		initialIndexData.pSysMem = indices;
+
+		Graphics::Device->CreateBuffer(&ibd, &initialIndexData, indexBuffer.GetAddressOf());
+	}
+}
+
 void Mesh::Draw()
 {
+	UINT stride = sizeof(Vertex);
+	UINT offset = 0;
+	Graphics::Context->IASetVertexBuffers(0, 1, vertexBuffer.GetAddressOf(), &stride, &offset);
+	Graphics::Context->IASetIndexBuffer(indexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
+
+	Graphics::Context->DrawIndexed(indexCount, 0, 0);
 }

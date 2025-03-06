@@ -59,7 +59,7 @@ void Game::Initialize()
 	}
 	
 	// Create the camera for game
-	camera = std::make_shared<Camera>(Window::AspectRatio(), 0, 0, -5, 45, true);
+	camera = std::make_shared<Camera>(Window::AspectRatio(), 0, 0, -20, 45, true);
 	cameras.push_back(camera);
 	camera = std::make_shared<Camera>(Window::AspectRatio(), 2, 0, -2, 60, false);
 	cameras.push_back(camera);
@@ -88,120 +88,93 @@ Game::~Game()
 // --------------------------------------------------------
 void Game::CreateGeometry()
 {
-	XMFLOAT4 red = XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f);
-	XMFLOAT4 green = XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f);
-	XMFLOAT4 blue = XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f);
-	XMFLOAT4 black = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
-
-	//// First Mesh
-	//{
-	//	Vertex vertices[] =
-	//	{
-	//		{ XMFLOAT3(+0.0f, +0.25f, +0.0f), red },
-	//		{ XMFLOAT3(+0.5f, -0.25f, +0.0f), blue },
-	//		{ XMFLOAT3(-0.5f, -0.25f, +0.0f), green },
-	//	};
-
-	//	unsigned int indices[] = { 0, 1, 2 };
-
-	//	int vertexCount = sizeof(vertices) / sizeof(vertices[0]);
-	//	int indexCount = sizeof(indices) / sizeof(indices[0]);
-
-	//	mesh = std::make_shared<Mesh>(vertices, indices, vertexCount, indexCount);
-	//	meshes.push_back(mesh);
-	//}
-
-	//// Second Mesh
-	//{
-	//	Vertex vertices[] =
-	//	{
-	//		{ XMFLOAT3(-0.3f, -0.1f, +0.0f), red },
-	//		{ XMFLOAT3(-0.3f, +0.1f, +0.0f), red },
-	//		{ XMFLOAT3(+0.0f, -0.1f, +0.0f), blue },
-	//		{ XMFLOAT3(+0.0f, +0.1f, +0.0f), blue },
-	//		{ XMFLOAT3(+0.3f, -0.1f, +0.0f), green },
-	//		{ XMFLOAT3(+0.3f, +0.1f, +0.0f), green },
-	//	};
-
-	//	unsigned int indices[] = 
-	//	{
-	//		0, 1, 2,
-	//		2, 1, 3,
-	//		2, 3, 4,
-	//		4, 3, 5
-	//	};
-
-	//	int vertexCount = sizeof(vertices) / sizeof(vertices[0]);
-	//	int indexCount = sizeof(indices) / sizeof(indices[0]);
-
-	//	mesh = std::make_shared<Mesh>(vertices, indices, vertexCount, indexCount);
-	//	meshes.push_back(mesh);
-	//}
-
-	//// Third Mesh
-	//{
-	//	Vertex vertices[] =
-	//	{
-	//		{ XMFLOAT3(+0.0f, +0.3f, +0.0f), green },
-	//		{ XMFLOAT3(-0.2f, +0.0f, +0.0f), black },
-	//		{ XMFLOAT3(+0.2f, +0.0f, +0.0f), black },
-	//		{ XMFLOAT3(+0.0f, +0.0f, +0.0f), black },
-	//		{ XMFLOAT3(-0.2f, -0.3f, +0.0f), red },
-	//		{ XMFLOAT3(+0.2f, -0.3f, +0.0f), blue },
-
-	//	};
-
-	//	unsigned int indices[] =
-	//	{
-	//		1, 0, 3,
-	//		3, 0, 2,
-	//		4, 1, 3,
-	//		5, 3, 2
-	//	};
-
-	//	int vertexCount = sizeof(vertices) / sizeof(vertices[0]);
-	//	int indexCount = sizeof(indices) / sizeof(indices[0]);
-
-	//	mesh = std::make_shared<Mesh>(vertices, indices, vertexCount, indexCount);
-	//	meshes.push_back(mesh);
-	//}
-
-	// Load shaders
+	// Load shaders, MUST be done before creating materials
 	std::shared_ptr<SimpleVertexShader> vs = std::make_shared<SimpleVertexShader>(
 		Graphics::Device, Graphics::Context, FixPath(L"VertexShader.cso").c_str());
 	std::shared_ptr<SimplePixelShader> ps = std::make_shared<SimplePixelShader>(
 		Graphics::Device, Graphics::Context, FixPath(L"PixelShader.cso").c_str());
+	std::shared_ptr<SimplePixelShader> psUV = std::make_shared<SimplePixelShader>(
+		Graphics::Device, Graphics::Context, FixPath(L"DebugUVsPS.cso").c_str());
+	std::shared_ptr<SimplePixelShader> psNormal = std::make_shared<SimplePixelShader>(
+		Graphics::Device, Graphics::Context, FixPath(L"DebugNormalsPS.cso").c_str());
+	std::shared_ptr<SimplePixelShader> psCustom = std::make_shared<SimplePixelShader>(
+		Graphics::Device, Graphics::Context, FixPath(L"CustomPS.cso").c_str());
 
 
 	// Create materials, MUST be done before creating entities
-	DirectX::XMFLOAT4 colorTint(1.0f, 1.0f, 1.0f, 1.0f);
-	std::shared_ptr<Material> mat = std::make_shared<Material>(colorTint, vs, ps);
+	colorTint = { 1.0f, 0.0f, 1.0f, 1.0f };
+	std::shared_ptr<Material> mat1 = std::make_shared<Material>(colorTint, vs, ps);
 
+	colorTint = { 0.3f, 0.3f, 0.3f, 1.0f };
+	std::shared_ptr<Material> mat2 = std::make_shared<Material>(colorTint, vs, ps);
+
+	colorTint = { 0.0f, 1.0f, 0.0f, 1.0f };
+	std::shared_ptr<Material> mat3 = std::make_shared<Material>(colorTint, vs, ps);
+
+	colorTint = { 1.0f, 0.0f, 1.0f, 1.0f };
+	std::shared_ptr<Material> matUV = std::make_shared<Material>(colorTint, vs, psUV);
+	std::shared_ptr<Material> matNormal = std::make_shared<Material>(colorTint, vs, psNormal);
+	std::shared_ptr<Material> matCustom = std::make_shared<Material>(colorTint, vs, psCustom);
+
+
+	// Load meshes from obj files
+	sphere = std::make_shared<Mesh>(FixPath("../../Assets/Models/sphere.obj").c_str());
+	meshes.push_back(sphere);
+	cube = std::make_shared<Mesh>(FixPath("../../Assets/Models/cube.obj").c_str());
+	meshes.push_back(cube);
+	helix = std::make_shared<Mesh>(FixPath("../../Assets/Models/helix.obj").c_str());
+	meshes.push_back(helix);
 	
 
-	entity = std::make_shared<GameEntity>(std::make_shared<Mesh>(FixPath("../../Assets/Models/sphere.obj").c_str()), mat);
+	// Create entities
+	entity = std::make_shared<GameEntity>(sphere, mat1);
+	entities.push_back(entity);
+	entity = std::make_shared<GameEntity>(cube, mat1);
+	entities.push_back(entity);
+	entity = std::make_shared<GameEntity>(helix, mat1);
 	entities.push_back(entity);
 
-	//// Create, place, and push_back each entity
-	//entity = std::make_shared<GameEntity>(meshes[0], mat);
-	//entity->GetTransform()->SetPosition(-0.4f, -0.2f, 0.0f);
-	//entities.push_back(entity);
+	entity = std::make_shared<GameEntity>(sphere, mat2);
+	entities.push_back(entity);
+	entity = std::make_shared<GameEntity>(cube, mat2);
+	entities.push_back(entity);
+	entity = std::make_shared<GameEntity>(helix, mat2);
+	entities.push_back(entity);
 
-	//entity = std::make_shared<GameEntity>(meshes[1], mat);
-	//entity->GetTransform()->SetPosition(-0.1f, 0.5f, 0.0f);
-	//entities.push_back(entity);
+	entity = std::make_shared<GameEntity>(sphere, mat3);
+	entities.push_back(entity);
+	entity = std::make_shared<GameEntity>(cube, mat3);
+	entities.push_back(entity);
+	entity = std::make_shared<GameEntity>(helix, mat3);
+	entities.push_back(entity);
 
-	//entity = std::make_shared<GameEntity>(meshes[2], mat);
-	//entity->GetTransform()->SetPosition(0.3f, 0.1f, 0.0f);
-	//entities.push_back(entity);
-	//
-	//entity = std::make_shared<GameEntity>(meshes[2], mat);
-	//entity->GetTransform()->SetPosition(0.5f, -0.3f, 0.0f);
-	//entities.push_back(entity);
+	entity = std::make_shared<GameEntity>(sphere, matUV);
+	entities.push_back(entity);
+	entity = std::make_shared<GameEntity>(cube, matUV);
+	entities.push_back(entity);
+	entity = std::make_shared<GameEntity>(helix, matUV);
+	entities.push_back(entity);
 
-	//entity = std::make_shared<GameEntity>(meshes[2], mat);
-	//entity->GetTransform()->SetPosition(0.7f, -0.7f, 0.0f);
-	//entities.push_back(entity);
+	entity = std::make_shared<GameEntity>(sphere, matNormal);
+	entities.push_back(entity);
+	entity = std::make_shared<GameEntity>(cube, matNormal);
+	entities.push_back(entity);
+	entity = std::make_shared<GameEntity>(helix, matNormal);
+	entities.push_back(entity);
+
+	entity = std::make_shared<GameEntity>(sphere, matCustom);
+	entities.push_back(entity);
+	entity = std::make_shared<GameEntity>(cube, matCustom);
+	entities.push_back(entity);
+	entity = std::make_shared<GameEntity>(helix, matCustom);
+	entities.push_back(entity);
+
+
+	// Set appropriate positions for each entity
+	for (int i = 0; i < entities.size(); i++)
+	{
+		entities[i]->GetTransform()->MoveAbsolute((i / 3) * 3, -(i % 3) * 3, 0);
+	}
 }
 
 
@@ -230,17 +203,11 @@ void Game::Update(float deltaTime, float totalTime)
 	if (Input::KeyDown(VK_ESCAPE))
 		Window::Quit();
 
-	//// Transform
-	//float t = sin(totalTime * 10.0f) / 100.0f;
-	//entities[0]->GetTransform()->MoveAbsolute(t, 0.0f, 0.0f);
-
-	//float s = sin(totalTime) * 0.5f + 1.0f;
-	//entities[1]->GetTransform()->SetScale(s, s, s);
-
-	//for (int i = 2; i < entities.size(); i++)
-	//{
-	//	entities[i]->GetTransform()->Rotate(0, 0, deltaTime);
-	//}
+	// Rotate the entities every frame
+	for (int i = 0; i < entities.size(); i++)
+	{
+		entities[i]->GetTransform()->Rotate(0, deltaTime, 0);
+	}
 
 	// Camera
 	for (std::shared_ptr cam : cameras)
@@ -276,25 +243,6 @@ void Game::Draw(float deltaTime, float totalTime)
 			{
 				for (std::shared_ptr ge : entities)
 				{
-					//std::shared_ptr<SimpleVertexShader> vs = ge->GetMaterial()->GetVS();
-					//std::shared_ptr<SimplePixelShader> ps = ge->GetMaterial()->GetPS();
-					//
-					//// Set up the pipeline for this entity (and mesh)
-					//vs->SetShader();
-					//ps->SetShader();
-
-					//// Collect data for the vertex shader
-					//vs->SetMatrix4x4("world", ge->GetTransform()->GetWorldMatrix());
-					//vs->SetMatrix4x4("view", cam->GetView());
-					//vs->SetMatrix4x4("projection", cam->GetProjection());
-
-					//// Copy data to constant buffers
-					//vs->CopyAllBufferData();
-
-					//// Same for the pixel shader
-					//ps->SetFloat("Time", totalTime);
-					//ps->CopyAllBufferData();
-
 					ge->Draw(cam);
 				}
 			}
@@ -404,12 +352,6 @@ void Game::CustomUI()
 			ImGui::PopID();
 		}
 	}
-
-	//if (ImGui::CollapsingHeader("Constant Buffer"))
-	//{
-	//	ImGui::DragFloat3("Offset", &offset.x, 0.05f, 0.0f, 0.0f, "%.2f", 0);
-	//	ImGui::ColorEdit4("Mesh Color Tint", &colorTint.x);
-	//}
 
 	// Entity UI
 	if (ImGui::CollapsingHeader("Scene Entities"))
