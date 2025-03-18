@@ -6,7 +6,7 @@
 #include "Window.h"
 #include "Transform.h"
 #include "Material.h"
-//#include “WICTextureLoader.h”
+#include "WICTextureLoader.h"
 
 // Needed for a helper function to load pre-compiled shader files
 #pragma comment(lib, "d3dcompiler.lib")
@@ -36,7 +36,10 @@ void Game::Initialize()
 	//  - You'll be expanding and/or replacing these later
 	CreateGeometry();
 
-	//DirectX::CreateWICTextureFromFile();
+	// Create texture
+	DirectX::CreateWICTextureFromFile(Graphics::Device.Get(), Graphics::Context.Get(),
+		FixPath(L"../../Assets/Textures/Bricks059_4K-PNG_Color.png").c_str(), nullptr, textureSRV.GetAddressOf());
+	
 
 	// Set initial graphics API state
 	//  - These settings persist until we change them
@@ -258,8 +261,8 @@ void Game::Draw(float deltaTime, float totalTime)
 			{
 				for (std::shared_ptr ge : entities)
 				{
-					//ge->GetMaterial()->GetPS()->SetShaderResourceView();
-					//ge->GetMaterial()->GetPS()->SetSamplerState("BasicSampler", );
+					ge->GetMaterial()->GetPS()->SetShaderResourceView("SurfaceTexture", textureSRV);
+					ge->GetMaterial()->GetPS()->SetSamplerState("BasicSampler", sampler);
 
 					ge->Draw(cam);
 				}

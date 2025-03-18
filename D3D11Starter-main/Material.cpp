@@ -36,3 +36,13 @@ void Material::SetColorTint(DirectX::XMFLOAT4 _colorTint)
 {
 	colorTint = _colorTint;
 }
+
+void Material::AddTextureSRV(std::string shaderVariableName, Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srv)
+{
+	textureSRVs.insert({ shaderVariableName, srv });
+}
+
+void Material::AddSampler(std::string shaderVariableName, Microsoft::WRL::ComPtr<ID3D11SamplerState> sampler)
+{
+	samplers.insert({ shaderVariableName, sampler });
+}
