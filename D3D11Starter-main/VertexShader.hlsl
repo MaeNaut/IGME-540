@@ -43,6 +43,7 @@ struct VertexToPixel
 	float4 screenPosition	: SV_POSITION;	// XYZW position (System Value Position)
 	float2 uv				: TEXCOORD;
 	float3 normal			: NORMAL;
+	float3 worldPos			: POSITION;
 };
 
 // --------------------------------------------------------
@@ -68,7 +69,7 @@ VertexToPixel main( VertexShaderInput input )
     //output.screenPosition = mul(world, float4(input.localPosition, 1.0f));
     matrix wvp = mul(projection, mul(view, world));
     output.screenPosition = mul(wvp, float4(input.localPosition, 1.0f));
-    // output.screenPosition = float4(input.localPosition + offset, 1.0f);
+	output.worldPos = mul(world, float4(input.localPosition, 1.0f)).xyz;
 
 	// Pass the color through 
 	// - The values will be interpolated per-pixel by the rasterizer
@@ -76,7 +77,7 @@ VertexToPixel main( VertexShaderInput input )
 	// output.color = colorTint;
 
 	output.uv = input.uv;
-	output.normal = input.normal;
+	output.normal = normalize(mul((float3x3)worldInvTrans, input.normal));
 
 	// Whatever we return will make its way through the pipeline to the
 	// next programmable stage we're using (the pixel shader for now)
