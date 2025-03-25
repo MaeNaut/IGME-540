@@ -1,10 +1,11 @@
 #include "Material.h"
 
-Material::Material(DirectX::XMFLOAT4 _colorTint, std::shared_ptr<SimpleVertexShader> _vs, std::shared_ptr<SimplePixelShader> _ps)
+Material::Material(DirectX::XMFLOAT4 _colorTint, std::shared_ptr<SimpleVertexShader> _vs, std::shared_ptr<SimplePixelShader> _ps, float _roughness)
 {
 	colorTint = _colorTint;
 	vs = _vs;
 	ps = _ps;
+	roughness = _roughness;
 
 	scale = { 1.0f, 1.0f };
 	offset = { 0.0f, 0.0f };
@@ -33,6 +34,11 @@ DirectX::XMFLOAT2 Material::GetScale()
 DirectX::XMFLOAT2 Material::GetOffset()
 {
 	return offset;
+}
+
+float Material::GetRoughness()
+{
+	return roughness;
 }
 
 std::unordered_map<std::string, Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>> Material::GetSRV()

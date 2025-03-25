@@ -42,6 +42,7 @@ void GameEntity::Draw(std::shared_ptr<Camera> camera)
 	std::shared_ptr<SimplePixelShader> ps = material->GetPS();
 
 	vs->SetMatrix4x4("world", transform->GetWorldMatrix());
+	vs->SetMatrix4x4("worldInvTrans", transform->GetWorldInverseTransposeMatrix());
 	vs->SetMatrix4x4("view", camera->GetView());
 	vs->SetMatrix4x4("projection", camera->GetProjection());
 
@@ -51,6 +52,7 @@ void GameEntity::Draw(std::shared_ptr<Camera> camera)
 	ps->SetFloat4("colorTint", material->GetColorTint());
 	ps->SetFloat2("scale", material->GetScale());
 	ps->SetFloat2("offset", material->GetOffset());
+	ps->SetFloat("roughness", material->GetRoughness());
 	ps->CopyAllBufferData();
 
 	// Draw the entity

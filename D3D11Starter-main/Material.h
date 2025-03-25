@@ -11,7 +11,7 @@ class Material
 {
 public:
 	// Constructor
-	Material(DirectX::XMFLOAT4 _colorTint, std::shared_ptr<SimpleVertexShader> _vs, std::shared_ptr<SimplePixelShader> _ps);
+	Material(DirectX::XMFLOAT4 _colorTint, std::shared_ptr<SimpleVertexShader> _vs, std::shared_ptr<SimplePixelShader> _ps, float _roughness);
 
 	// Getters
 	std::shared_ptr<SimpleVertexShader> GetVS();
@@ -19,6 +19,7 @@ public:
 	DirectX::XMFLOAT4 GetColorTint();
 	DirectX::XMFLOAT2 GetScale();
 	DirectX::XMFLOAT2 GetOffset();
+	float GetRoughness();
 	std::unordered_map<std::string, Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>> GetSRV();
 
 	// Setters
@@ -37,6 +38,8 @@ private:
 	DirectX::XMFLOAT4 colorTint;
 	DirectX::XMFLOAT2 scale;
 	DirectX::XMFLOAT2 offset;
+	float roughness;
+
 	std::shared_ptr<SimpleVertexShader> vs;
 	std::shared_ptr<SimplePixelShader> ps;
 

@@ -4,6 +4,7 @@
 #include "GameEntity.h"
 #include "Camera.h"
 #include "SimpleShader.h"
+#include "Lights.h"
 
 #include <d3d11.h>
 #include <wrl/client.h>
@@ -32,13 +33,7 @@ private:
 	// Initialization helper methods - feel free to customize, combine, remove, etc.
 	void CreateGeometry();
 
-	// Note the usage of ComPtr below
-	//  - This is a smart pointer for objects that abide by the
-	//     Component Object Model, which DirectX objects do
-	//  - More info here: https://github.com/Microsoft/DirectXTK/wiki/ComPtr
-
-
-	// fields for UI
+	// Fields for UI
 	bool show_demo_window = false;
 	int zipCode = 00501;
 	DirectX::XMFLOAT4 bgColor = { 1.0f, 1.0f, 1.0f, 1.0f };
@@ -64,4 +59,8 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> fabricTexture;
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> crackTexture;
 	Microsoft::WRL::ComPtr<ID3D11SamplerState> sampler;
+
+	// Fields for lighting
+	DirectX::XMFLOAT3 ambientColor;
+	Light directionalLight1;
 };

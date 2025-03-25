@@ -65,6 +65,15 @@ void Game::Initialize()
 	cameras.push_back(camera);
 	camera = std::make_shared<Camera>(Window::AspectRatio(), -1.0f, 1.0f, -2.0f, 90.0f, false);
 	cameras.push_back(camera);
+
+
+	// Initialize some fields here
+	ambientColor = { 0.1f, 0.1f, 0.25f };
+	directionalLight1 = {};
+	directionalLight1.Type = 0;
+	directionalLight1.Direction = { 1.0f, -1.0f, 0.0f };
+	directionalLight1.Color = { 0.2f, 0.2f, 1.0f };
+	directionalLight1.Intensity = 1.0f;
 }
 
 
@@ -119,20 +128,20 @@ void Game::CreateGeometry()
 
 	// Create materials, MUST be done before creating entities
 	colorTint = { 1.0f, 1.0f, 1.0f, 1.0f };
-	std::shared_ptr<Material> mat1 = std::make_shared<Material>(colorTint, vs, combinePS);
+	std::shared_ptr<Material> mat1 = std::make_shared<Material>(colorTint, vs, combinePS, 1.0f);
 	mat1->AddTextureSRV("SurfaceTexture1", brickTexture);
 	mat1->AddTextureSRV("SurfaceTexture2", crackTexture);
 	mat1->AddSampler("BasicSampler", sampler);
 	materials.push_back(mat1);
 
 	colorTint = { 0.0f, 1.0f, 1.0f, 1.0f };
-	std::shared_ptr<Material> mat2 = std::make_shared<Material>(colorTint, vs, ps);
+	std::shared_ptr<Material> mat2 = std::make_shared<Material>(colorTint, vs, ps, 1.0f);
 	mat2->AddTextureSRV("SurfaceTexture", brickTexture);
 	mat2->AddSampler("BasicSampler", sampler);
 	materials.push_back(mat2);
 
 	colorTint = { 1.0f, 1.0f, 1.0f, 1.0f };
-	std::shared_ptr<Material> mat3 = std::make_shared<Material>(colorTint, vs, ps);
+	std::shared_ptr<Material> mat3 = std::make_shared<Material>(colorTint, vs, ps, 0.0f);
 	mat3->AddTextureSRV("SurfaceTexture", fabricTexture);
 	mat3->AddSampler("BasicSampler", sampler);
 	materials.push_back(mat3);
@@ -244,6 +253,8 @@ void Game::Draw(float deltaTime, float totalTime)
 			{
 				for (std::shared_ptr ge : entities)
 				{
+					ge->GetMaterial()->GetPS()->SetFloat3("ambient", ambientColor);
+					ge->GetMaterial()->GetPS()->SetData("directionalLight1", &directionalLight1, sizeof(Light));
 					ge->GetMaterial()->BindResources();
 					ge->Draw(cam);
 				}
