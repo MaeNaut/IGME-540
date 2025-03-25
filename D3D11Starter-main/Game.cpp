@@ -71,8 +71,8 @@ void Game::Initialize()
 	ambientColor = { 0.1f, 0.1f, 0.25f };
 	directionalLight1 = {};
 	directionalLight1.Type = 0;
-	directionalLight1.Direction = { 1.0f, -1.0f, 0.0f };
-	directionalLight1.Color = { 0.2f, 0.2f, 1.0f };
+	directionalLight1.Direction = { 1.0f, 0.0f, 0.0f };
+	directionalLight1.Color = { 1.0f, 0.0f, 0.0f };
 	directionalLight1.Intensity = 1.0f;
 }
 

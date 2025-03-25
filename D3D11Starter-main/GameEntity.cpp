@@ -53,6 +53,7 @@ void GameEntity::Draw(std::shared_ptr<Camera> camera)
 	ps->SetFloat2("scale", material->GetScale());
 	ps->SetFloat2("offset", material->GetOffset());
 	ps->SetFloat("roughness", material->GetRoughness());
+	ps->SetFloat3("cameraPosition", camera->GetTransform()->GetPosition());
 	ps->CopyAllBufferData();
 
 	// Draw the entity

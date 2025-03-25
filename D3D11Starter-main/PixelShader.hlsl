@@ -25,46 +25,52 @@ cbuffer ExternalData : register(b0)
 // --------------------------------------------------------
 float4 main(VertexToPixel input) : SV_TARGET
 {
-	// Just return the input color
-	// - This color (like most values passing through the rasterizer) is 
-	//   interpolated for each pixel between the corresponding vertices 
-	//   of the triangle we're rendering
+    // Just return the input color
+    // - This color (like most values passing through the rasterizer) is 
+    //   interpolated for each pixel between the corresponding vertices 
+    //   of the triangle we're rendering
 
+    // Clean up un-normalized normals and tangents
+    input.normal = normalize(input.normal);
 
 	// Calculate texture coordinates
     input.uv = input.uv * scale + offset;
+
+    //// Sample the normal map
+    //float3 normalFromMap = NormalMap.Sample(BasicSampler, input.uv);
+
+    //// Unpack the normals
+    //normalFromMap = normalFromMap * 2 - 1;
+
+    //input.normal = normalFromMap;
     
     // Texture
     float4 surfaceColor = SurfaceTexture.Sample(BasicSampler, input.uv);
+    surfaceColor *= colorTint;
 
 	// Total light
     float3 totalLight = float3(0.0f, 0.0f, 0.0f);
 
 	// Ambient definition
-    float3 ambientColor = float3(0.25f, 0.25f, 0.25f);
-    float3 ambientTerm = ambientColor * surfaceColor;
-
-	// Light definition
-    float3 lightColor = float3(1.0f, 1.0f, 1.0f);
-    float lightIntensity = 1.0f;
-    float3 lightDirection = float3(1.0f, 0.0f, 0.0f);
+    float3 ambientTerm = ambient * surfaceColor;
 
 	// Diffuse calculation
     float3 diffuseTerm =
-		max(dot(input.normal, -lightDirection), 0) *
-		lightColor * lightIntensity * surfaceColor;
+		max(dot(input.normal, -directionalLight1.Direction), 0.0f) *
+		directionalLight1.Color * directionalLight1.Intensity * surfaceColor;
 
 	// Specular calculation
-    float3 refl = reflect(lightDirection, input.normal);
+    float specExponent = (1.0f - roughness) * MAX_SPECULAR_EXPONENT;
+    float3 refl = reflect(directionalLight1.Direction, input.normal);
     float viewVector = normalize(cameraPosition - input.worldPos);
 
-    float3 specTerm = pow(max(dot(refl, viewVector), 0), 256) *
-		lightColor * lightIntensity * surfaceColor;
+    float3 specTerm = pow(max(dot(refl, viewVector), 0.0f), specExponent) *
+        directionalLight1.Color * directionalLight1.Intensity * surfaceColor;
 	  
 	// Combine all lights
     totalLight += ambientTerm + diffuseTerm + specTerm;
 
-    return float4(totalLight, 1);
+    return float4(specTerm, 1);
 
 
 

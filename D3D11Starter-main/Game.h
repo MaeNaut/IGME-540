@@ -36,7 +36,7 @@ private:
 	// Fields for UI
 	bool show_demo_window = false;
 	int zipCode = 00501;
-	DirectX::XMFLOAT4 bgColor = { 1.0f, 1.0f, 1.0f, 1.0f };
+	DirectX::XMFLOAT4 bgColor = { 0.0f, 0.0f, 0.0f, 1.0f };
 	DirectX::XMFLOAT4 colorTint;
 
 	// Mesh fields
