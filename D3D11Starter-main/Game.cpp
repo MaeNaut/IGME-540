@@ -23,7 +23,6 @@
 
 // For the DirectX Math library
 using namespace DirectX;
-//Transform transform;
 
 // --------------------------------------------------------
 // Called once per program, after the window and graphics API
@@ -35,11 +34,6 @@ void Game::Initialize()
 	// geometry to draw and some simple camera matrices.
 	//  - You'll be expanding and/or replacing these later
 	CreateGeometry();
-
-	// Create texture
-	DirectX::CreateWICTextureFromFile(Graphics::Device.Get(), Graphics::Context.Get(),
-		FixPath(L"../../Assets/Textures/Bricks059_4K-PNG_Color.png").c_str(), nullptr, textureSRV.GetAddressOf());
-	
 
 	// Set initial graphics API state
 	//  - These settings persist until we change them
@@ -65,23 +59,12 @@ void Game::Initialize()
 	
 
 	// Create the cameras for game
-	camera = std::make_shared<Camera>(Window::AspectRatio(), 0, 0, -20, 45, true);
+	camera = std::make_shared<Camera>(Window::AspectRatio(), 0.0f, 0.0f, -20.0f, 45.0f, true);
 	cameras.push_back(camera);
-	camera = std::make_shared<Camera>(Window::AspectRatio(), 2, 0, -2, 60, false);
+	camera = std::make_shared<Camera>(Window::AspectRatio(), 2.0f, 0.0f, -2.0f, 60.0f, false);
 	cameras.push_back(camera);
-	camera = std::make_shared<Camera>(Window::AspectRatio(), -1, 1, -2, 90, false);
+	camera = std::make_shared<Camera>(Window::AspectRatio(), -1.0f, 1.0f, -2.0f, 90.0f, false);
 	cameras.push_back(camera);
-
-
-	// Create a sampler
-	D3D11_SAMPLER_DESC sampDesc{};
-	sampDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
-	sampDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
-	sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
-	sampDesc.Filter = D3D11_FILTER_ANISOTROPIC;
-	sampDesc.MaxAnisotropy = 16;
-	sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
-	Graphics::Device->CreateSamplerState(&sampDesc, sampler.GetAddressOf());
 }
 
 
@@ -110,28 +93,49 @@ void Game::CreateGeometry()
 		Graphics::Device, Graphics::Context, FixPath(L"VertexShader.cso").c_str());
 	std::shared_ptr<SimplePixelShader> ps = std::make_shared<SimplePixelShader>(
 		Graphics::Device, Graphics::Context, FixPath(L"PixelShader.cso").c_str());
-	std::shared_ptr<SimplePixelShader> psUV = std::make_shared<SimplePixelShader>(
-		Graphics::Device, Graphics::Context, FixPath(L"DebugUVsPS.cso").c_str());
-	std::shared_ptr<SimplePixelShader> psNormal = std::make_shared<SimplePixelShader>(
-		Graphics::Device, Graphics::Context, FixPath(L"DebugNormalsPS.cso").c_str());
-	std::shared_ptr<SimplePixelShader> psCustom = std::make_shared<SimplePixelShader>(
-		Graphics::Device, Graphics::Context, FixPath(L"CustomPS.cso").c_str());
+	std::shared_ptr<SimplePixelShader> combinePS = std::make_shared<SimplePixelShader>(
+		Graphics::Device, Graphics::Context, FixPath(L"CombinePS.cso").c_str());
+
+
+	// Load textures
+	CreateWICTextureFromFile(Graphics::Device.Get(), Graphics::Context.Get(),
+		FixPath(L"../../Assets/Textures/brick.png").c_str(), nullptr, brickTexture.GetAddressOf());
+	CreateWICTextureFromFile(Graphics::Device.Get(), Graphics::Context.Get(),
+		FixPath(L"../../Assets/Textures/fabric.png").c_str(), nullptr, fabricTexture.GetAddressOf());
+	CreateWICTextureFromFile(Graphics::Device.Get(), Graphics::Context.Get(),
+		FixPath(L"../../Assets/Textures/crack.png").c_str(), nullptr, crackTexture.GetAddressOf());
+
+
+	// Create a sampler
+	D3D11_SAMPLER_DESC sampDesc{};
+	sampDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+	sampDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+	sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+	sampDesc.Filter = D3D11_FILTER_ANISOTROPIC;
+	sampDesc.MaxAnisotropy = 16;
+	sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
+	Graphics::Device->CreateSamplerState(&sampDesc, sampler.GetAddressOf());
 
 
 	// Create materials, MUST be done before creating entities
-	colorTint = { 1.0f, 0.0f, 1.0f, 1.0f };
-	std::shared_ptr<Material> mat1 = std::make_shared<Material>(colorTint, vs, ps);
+	colorTint = { 1.0f, 1.0f, 1.0f, 1.0f };
+	std::shared_ptr<Material> mat1 = std::make_shared<Material>(colorTint, vs, combinePS);
+	mat1->AddTextureSRV("SurfaceTexture1", brickTexture);
+	mat1->AddTextureSRV("SurfaceTexture2", crackTexture);
+	mat1->AddSampler("BasicSampler", sampler);
+	materials.push_back(mat1);
 
-	colorTint = { 0.3f, 0.3f, 0.3f, 1.0f };
+	colorTint = { 0.0f, 1.0f, 1.0f, 1.0f };
 	std::shared_ptr<Material> mat2 = std::make_shared<Material>(colorTint, vs, ps);
+	mat2->AddTextureSRV("SurfaceTexture", brickTexture);
+	mat2->AddSampler("BasicSampler", sampler);
+	materials.push_back(mat2);
 
-	colorTint = { 0.0f, 1.0f, 0.0f, 1.0f };
+	colorTint = { 1.0f, 1.0f, 1.0f, 1.0f };
 	std::shared_ptr<Material> mat3 = std::make_shared<Material>(colorTint, vs, ps);
-
-	colorTint = { 1.0f, 0.0f, 1.0f, 1.0f };
-	std::shared_ptr<Material> matUV = std::make_shared<Material>(colorTint, vs, psUV);
-	std::shared_ptr<Material> matNormal = std::make_shared<Material>(colorTint, vs, psNormal);
-	std::shared_ptr<Material> matCustom = std::make_shared<Material>(colorTint, vs, psCustom);
+	mat3->AddTextureSRV("SurfaceTexture", fabricTexture);
+	mat3->AddSampler("BasicSampler", sampler);
+	materials.push_back(mat3);
 
 
 	// Load meshes from obj files
@@ -165,32 +169,11 @@ void Game::CreateGeometry()
 	entity = std::make_shared<GameEntity>(helix, mat3);
 	entities.push_back(entity);
 
-	entity = std::make_shared<GameEntity>(sphere, matUV);
-	entities.push_back(entity);
-	entity = std::make_shared<GameEntity>(cube, matUV);
-	entities.push_back(entity);
-	entity = std::make_shared<GameEntity>(helix, matUV);
-	entities.push_back(entity);
-
-	entity = std::make_shared<GameEntity>(sphere, matNormal);
-	entities.push_back(entity);
-	entity = std::make_shared<GameEntity>(cube, matNormal);
-	entities.push_back(entity);
-	entity = std::make_shared<GameEntity>(helix, matNormal);
-	entities.push_back(entity);
-
-	entity = std::make_shared<GameEntity>(sphere, matCustom);
-	entities.push_back(entity);
-	entity = std::make_shared<GameEntity>(cube, matCustom);
-	entities.push_back(entity);
-	entity = std::make_shared<GameEntity>(helix, matCustom);
-	entities.push_back(entity);
-
 
 	// Set appropriate positions for each entity
 	for (int i = 0; i < entities.size(); i++)
 	{
-		entities[i]->GetTransform()->MoveAbsolute((i / 3) * 3, -(i % 3) * 3, 0);
+		entities[i]->GetTransform()->MoveAbsolute((i / 3) * 3.0f, -(i % 3) * 3.0f, 0.0f);
 	}
 }
 
@@ -261,9 +244,7 @@ void Game::Draw(float deltaTime, float totalTime)
 			{
 				for (std::shared_ptr ge : entities)
 				{
-					ge->GetMaterial()->GetPS()->SetShaderResourceView("SurfaceTexture", textureSRV);
-					ge->GetMaterial()->GetPS()->SetSamplerState("BasicSampler", sampler);
-
+					ge->GetMaterial()->BindResources();
 					ge->Draw(cam);
 				}
 			}
@@ -408,7 +389,7 @@ void Game::CustomUI()
 	}
 
 	// Camera UI
-	if (ImGui::CollapsingHeader("Camera details"))
+	if (ImGui::CollapsingHeader("Camera Details"))
 	{
 		// Choose which camera to be activated
 		static int e = 0;
@@ -445,6 +426,48 @@ void Game::CustomUI()
 				ImGui::Text("Near Plane:   %.3f", cam->GetNearZ());
 				ImGui::Text("Far Plane:    %.3f", cam->GetFarZ());
 			}
+		}
+	}
+
+	// Material UI
+	if (ImGui::CollapsingHeader("Material Details"))
+	{
+		// Iterate through material vector
+		for (int i = 0; i < materials.size(); i++)
+		{
+			ImGui::PushID(id);
+			id++;
+			// Create tree node for each material
+			if (ImGui::TreeNode("", "Material %d", i))
+			{
+				// Show an image of the texture
+				// (using for loop for materials with multiple textures)
+				for (auto& t : materials[i]->GetSRV())
+				{
+					ImGui::Image((ImTextureID)t.second.Get(), ImVec2(128, 128));
+				}
+
+				XMFLOAT4 colorTint = materials[i]->GetColorTint();
+				XMFLOAT2 scale = materials[i]->GetScale();
+				XMFLOAT2 offset = materials[i]->GetOffset();
+				
+				// Drag Widgets to modify material's color tint, scale, and offset
+				if (ImGui::DragFloat4("Color Tint", &colorTint.x, 0.001f, 0.0f, 1.0f))
+				{
+					materials[i]->SetColorTint(colorTint);
+				}
+				if (ImGui::DragFloat2("Scale", &scale.x, 0.005f))
+				{
+					materials[i]->SetScale(scale);
+				}
+				if (ImGui::DragFloat2("Offset", &offset.x, 0.005f))
+				{
+					materials[i]->SetOffset(offset);
+				}
+
+				ImGui::TreePop();
+			}
+			ImGui::PopID();
 		}
 	}
 

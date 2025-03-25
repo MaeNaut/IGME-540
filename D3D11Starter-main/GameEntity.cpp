@@ -49,6 +49,8 @@ void GameEntity::Draw(std::shared_ptr<Camera> camera)
 
 	// Same for the pixel shader
 	ps->SetFloat4("colorTint", material->GetColorTint());
+	ps->SetFloat2("scale", material->GetScale());
+	ps->SetFloat2("offset", material->GetOffset());
 	ps->CopyAllBufferData();
 
 	// Draw the entity

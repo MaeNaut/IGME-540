@@ -58,6 +58,10 @@ private:
 	std::shared_ptr<Camera> camera;
 	std::vector<std::shared_ptr<Camera>> cameras;
 
-	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> textureSRV;
+	// Fields for textures
+	std::vector<std::shared_ptr<Material>> materials;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> brickTexture;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> fabricTexture;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> crackTexture;
 	Microsoft::WRL::ComPtr<ID3D11SamplerState> sampler;
 };

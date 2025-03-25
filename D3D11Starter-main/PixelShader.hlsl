@@ -1,7 +1,12 @@
 
+Texture2D SurfaceTexture  : register(t0);
+SamplerState BasicSampler : register(s0);
+
 cbuffer ExternalData : register(b0)
 {
 	float4 colorTint;
+    float2 scale;
+    float2 offset;
 }
 
 // Struct representing the data we expect to receive from earlier pipeline stages
@@ -37,11 +42,8 @@ float4 main(VertexToPixel input) : SV_TARGET
 	//   interpolated for each pixel between the corresponding vertices 
 	//   of the triangle we're rendering
 
-	// float2 uvScale = float2(5, 5);
-	// float2 uvOffset = float2(time, 0);
-	// float4 colorFromTexture = ColorTexture.Sample(BasicSampler, input.uv * scale);
-	// return colorFromTexture
+    input.uv = input.uv * scale + offset;
+    float4 surfaceColor = SurfaceTexture.Sample(BasicSampler, input.uv);
 	
-	// return float4(input.uv, 0, 1);
-	return float4(1, 1, 1, 1) * colorTint;
+	return surfaceColor * colorTint;
 }
