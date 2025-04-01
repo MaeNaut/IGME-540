@@ -69,11 +69,7 @@ void Game::Initialize()
 
 	// Initialize some fields here
 	ambientColor = { 0.1f, 0.1f, 0.25f };
-	directionalLight1 = {};
-	directionalLight1.Type = 0;
-	directionalLight1.Direction = { 1.0f, 0.0f, 0.0f };
-	directionalLight1.Color = { 1.0f, 0.0f, 0.0f };
-	directionalLight1.Intensity = 1.0f;
+	light = {};
 }
 
 
@@ -110,9 +106,7 @@ void Game::CreateGeometry()
 	CreateWICTextureFromFile(Graphics::Device.Get(), Graphics::Context.Get(),
 		FixPath(L"../../Assets/Textures/brick.png").c_str(), nullptr, brickTexture.GetAddressOf());
 	CreateWICTextureFromFile(Graphics::Device.Get(), Graphics::Context.Get(),
-		FixPath(L"../../Assets/Textures/fabric.png").c_str(), nullptr, fabricTexture.GetAddressOf());
-	CreateWICTextureFromFile(Graphics::Device.Get(), Graphics::Context.Get(),
-		FixPath(L"../../Assets/Textures/crack.png").c_str(), nullptr, crackTexture.GetAddressOf());
+		FixPath(L"../../Assets/Textures/onyx.png").c_str(), nullptr, onyxTexture.GetAddressOf());
 
 
 	// Create a sampler
@@ -128,62 +122,90 @@ void Game::CreateGeometry()
 
 	// Create materials, MUST be done before creating entities
 	colorTint = { 1.0f, 1.0f, 1.0f, 1.0f };
-	std::shared_ptr<Material> mat1 = std::make_shared<Material>(colorTint, vs, combinePS, 1.0f);
-	mat1->AddTextureSRV("SurfaceTexture1", brickTexture);
-	mat1->AddTextureSRV("SurfaceTexture2", crackTexture);
+	std::shared_ptr<Material> mat1 = std::make_shared<Material>(colorTint, vs, ps, 0.0f);
+	mat1->AddTextureSRV("SurfaceTexture", onyxTexture);
 	mat1->AddSampler("BasicSampler", sampler);
 	materials.push_back(mat1);
 
-	colorTint = { 0.0f, 1.0f, 1.0f, 1.0f };
-	std::shared_ptr<Material> mat2 = std::make_shared<Material>(colorTint, vs, ps, 1.0f);
+	std::shared_ptr<Material> mat2 = std::make_shared<Material>(colorTint, vs, ps, 0.0f);
 	mat2->AddTextureSRV("SurfaceTexture", brickTexture);
 	mat2->AddSampler("BasicSampler", sampler);
 	materials.push_back(mat2);
 
-	colorTint = { 1.0f, 1.0f, 1.0f, 1.0f };
-	std::shared_ptr<Material> mat3 = std::make_shared<Material>(colorTint, vs, ps, 0.0f);
-	mat3->AddTextureSRV("SurfaceTexture", fabricTexture);
+	std::shared_ptr<Material> mat3 = std::make_shared<Material>(colorTint, vs, ps, 0.9f);
+	mat3->AddTextureSRV("SurfaceTexture", onyxTexture);
 	mat3->AddSampler("BasicSampler", sampler);
 	materials.push_back(mat3);
 
+	std::shared_ptr<Material> mat4 = std::make_shared<Material>(colorTint, vs, ps, 0.9f);
+	mat4->AddTextureSRV("SurfaceTexture", brickTexture);
+	mat4->AddSampler("BasicSampler", sampler);
+	materials.push_back(mat4);
 
 	// Load meshes from obj files
 	sphere = std::make_shared<Mesh>(FixPath("../../Assets/Models/sphere.obj").c_str());
 	meshes.push_back(sphere);
 	cube = std::make_shared<Mesh>(FixPath("../../Assets/Models/cube.obj").c_str());
 	meshes.push_back(cube);
-	helix = std::make_shared<Mesh>(FixPath("../../Assets/Models/helix.obj").c_str());
-	meshes.push_back(helix);
-	
+	torus = std::make_shared<Mesh>(FixPath("../../Assets/Models/torus.obj").c_str());
+	meshes.push_back(torus);
+	quad = std::make_shared<Mesh>(FixPath("../../Assets/Models/quad_double_sided.obj").c_str());
+	meshes.push_back(quad);
+
 
 	// Create entities
 	entity = std::make_shared<GameEntity>(sphere, mat1);
 	entities.push_back(entity);
-	entity = std::make_shared<GameEntity>(cube, mat1);
-	entities.push_back(entity);
-	entity = std::make_shared<GameEntity>(helix, mat1);
-	entities.push_back(entity);
-
-	entity = std::make_shared<GameEntity>(sphere, mat2);
-	entities.push_back(entity);
 	entity = std::make_shared<GameEntity>(cube, mat2);
 	entities.push_back(entity);
-	entity = std::make_shared<GameEntity>(helix, mat2);
+	entity = std::make_shared<GameEntity>(torus, mat3);
 	entities.push_back(entity);
-
-	entity = std::make_shared<GameEntity>(sphere, mat3);
-	entities.push_back(entity);
-	entity = std::make_shared<GameEntity>(cube, mat3);
-	entities.push_back(entity);
-	entity = std::make_shared<GameEntity>(helix, mat3);
+	entity = std::make_shared<GameEntity>(quad, mat4);
 	entities.push_back(entity);
 
 
 	// Set appropriate positions for each entity
 	for (int i = 0; i < entities.size(); i++)
 	{
-		entities[i]->GetTransform()->MoveAbsolute((i / 3) * 3.0f, -(i % 3) * 3.0f, 0.0f);
+		entities[i]->GetTransform()->MoveAbsolute(i * 3.0f, 0.0f, 0.0f);
 	}
+
+
+	// Create lights
+	light.Type = 0;
+	light.Direction = { 1.0f, 0.0f, 0.0f };
+	light.Color = { 1.0f, 0.0f, 0.0f };
+	light.Intensity = 1.0f;
+	lights.push_back(light);
+
+	light.Type = 0;
+	light.Direction = { 0.0f, 1.0f, 0.0f };
+	light.Color = { 0.0f, 1.0f, 0.0f };
+	light.Intensity = 1.0f;
+	lights.push_back(light);
+
+	light.Type = 0;
+	light.Direction = { 0.0f, 0.0f, 1.0f };
+	light.Color = { 0.0f, 0.0f, 1.0f };
+	light.Intensity = 1.0f;
+	lights.push_back(light);
+
+	light.Type = 1;
+	light.Range = 20.0f;
+	light.Position = { 6.0f, 3.0f, -3.0f };
+	light.Color = { 1.0f, 1.0f, 1.0f };
+	light.Intensity = 1.0f;
+	lights.push_back(light);
+
+	light.Type = 2;
+	light.Direction = { 0.0f, -1.0f, 0.0f };
+	light.Range = 20.0f;
+	light.Position = { 9.0f, 10.0f, 0.0f };
+	light.Color = { 1.0f, 1.0f, 1.0f };
+	light.Intensity = 1.0f;
+	light.SpotInnerAngle = 3.14f / 45.0f;
+	light.SpotOuterAngle = 3.14f / 40.0f;
+	lights.push_back(light);
 }
 
 
@@ -254,7 +276,8 @@ void Game::Draw(float deltaTime, float totalTime)
 				for (std::shared_ptr ge : entities)
 				{
 					ge->GetMaterial()->GetPS()->SetFloat3("ambient", ambientColor);
-					ge->GetMaterial()->GetPS()->SetData("directionalLight1", &directionalLight1, sizeof(Light));
+					ge->GetMaterial()->GetPS()->SetData("lights", &lights[0], sizeof(Light) * (int)lights.size());
+					ge->GetMaterial()->GetPS()->SetInt("lightCount", (int)lights.size());
 					ge->GetMaterial()->BindResources();
 					ge->Draw(cam);
 				}
@@ -463,10 +486,8 @@ void Game::CustomUI()
 				XMFLOAT2 offset = materials[i]->GetOffset();
 				
 				// Drag Widgets to modify material's color tint, scale, and offset
-				if (ImGui::DragFloat4("Color Tint", &colorTint.x, 0.001f, 0.0f, 1.0f))
-				{
-					materials[i]->SetColorTint(colorTint);
-				}
+				ImGui::ColorEdit4("Color Tint", &colorTint.x);
+				materials[i]->SetColorTint(colorTint);
 				if (ImGui::DragFloat2("Scale", &scale.x, 0.005f))
 				{
 					materials[i]->SetScale(scale);
@@ -475,6 +496,45 @@ void Game::CustomUI()
 				{
 					materials[i]->SetOffset(offset);
 				}
+
+				ImGui::TreePop();
+			}
+			ImGui::PopID();
+		}
+	}
+
+	// Light UI
+	if (ImGui::CollapsingHeader("Light Details"))
+	{
+		// Allow the user to adjust the color of ambient
+		if (ImGui::DragFloat3("Ambient", &ambientColor.x, 0.001f, 0.0f, 1.0f)) {}
+		// Iterate through light vector
+		for (int i = 0; i < lights.size(); i++)
+		{
+			ImGui::PushID(id);
+			id++;
+			// Create tree node for each light
+			if (ImGui::TreeNode("", "Light %d", i))
+			{
+				// Display the type of light
+				switch (lights[i].Type)
+				{
+					case 0:
+						ImGui::Text("Light Type: Directional");
+						break;
+					case 1:
+						ImGui::Text("Light Type: Point");
+						break;
+					case 2:
+						ImGui::Text("Light Type: Spot");
+						break;
+				}
+
+				// Modify the data of each light
+				ImGui::ColorEdit3("Color", &lights[i].Color.x);
+				if (ImGui::DragFloat3("Position", &lights[i].Position.x, 0.005f)) {}
+				if (ImGui::DragFloat("Range", &lights[i].Range, 0.005f)) {}
+				if (ImGui::DragFloat("Intensity", &lights[i].Intensity, 0.005f)) {}
 
 				ImGui::TreePop();
 			}

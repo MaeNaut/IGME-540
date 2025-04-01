@@ -36,13 +36,14 @@ private:
 	// Fields for UI
 	bool show_demo_window = false;
 	int zipCode = 00501;
-	DirectX::XMFLOAT4 bgColor = { 0.0f, 0.0f, 0.0f, 1.0f };
+	DirectX::XMFLOAT4 bgColor = { 1.0f, 1.0f, 1.0f, 1.0f };
 	DirectX::XMFLOAT4 colorTint;
 
 	// Mesh fields
 	std::shared_ptr<Mesh> sphere;
 	std::shared_ptr<Mesh> cube;
-	std::shared_ptr<Mesh> helix;
+	std::shared_ptr<Mesh> torus;
+	std::shared_ptr<Mesh> quad;
 	std::vector<std::shared_ptr<Mesh>> meshes;
 
 	// Entity fields
@@ -56,11 +57,11 @@ private:
 	// Fields for textures
 	std::vector<std::shared_ptr<Material>> materials;
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> brickTexture;
-	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> fabricTexture;
-	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> crackTexture;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> onyxTexture;
 	Microsoft::WRL::ComPtr<ID3D11SamplerState> sampler;
 
 	// Fields for lighting
 	DirectX::XMFLOAT3 ambientColor;
-	Light directionalLight1;
+	Light light;
+	std::vector<Light> lights;
 };

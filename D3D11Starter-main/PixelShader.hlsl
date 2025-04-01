@@ -1,5 +1,7 @@
 #include "ShaderIncludes.hlsli"
 
+#define MAX_LIGHTS 128
+
 Texture2D SurfaceTexture  : register(t0);
 SamplerState BasicSampler : register(s0);
 
@@ -8,10 +10,96 @@ cbuffer ExternalData : register(b0)
 	float4 colorTint;
     float2 scale;
     float2 offset;
+    
     float roughness;
     float3 cameraPosition;
     float3 ambient;
-    Light directionalLight1;
+    
+    Light lights[MAX_LIGHTS];
+    int lightCount;
+}
+
+// Attenuate the light as the object is further away
+float Attenuate(Light light, float3 worldPos)
+{
+    float dist = distance(light.Position, worldPos);
+    float att = saturate(1.0f - (dist * dist / (light.Range * light.Range)));
+    return att * att;
+}
+
+// Calculate directional light
+float3 DirectionalLight(float3 normal, Light light, float3 worldPosition, float4 surfaceColor)
+{
+    float3 returnLight = { 0.0f, 0.0f, 0.0f };
+    float3 lightDirection = normalize(light.Direction);
+    
+    // Diffuse calculation
+    float3 diffuseTerm =
+		max(dot(normal, -lightDirection), 0.0f) *
+		light.Color * light.Intensity * surfaceColor.xyz;
+    returnLight += diffuseTerm;
+
+	// Specular calculation
+    if (roughness < 1.0f)
+    {
+        float specExponent = (1.0f - roughness) * MAX_SPECULAR_EXPONENT;
+        float3 refl = reflect(lightDirection, normal);
+        float3 viewVector = normalize(cameraPosition - worldPosition);
+        
+        float3 specTerm = pow(max(dot(refl, viewVector), 0.0f), specExponent) *
+            light.Color * light.Intensity * surfaceColor.xyz;
+        
+        returnLight += specTerm;
+    }
+    
+    // Return the resulting directional light
+    return returnLight;
+}
+
+// Calculate point light
+float3 PointLight(float3 normal, Light light, float3 worldPosition, float4 surfaceColor)
+{
+    float3 returnLight = { 0.0f, 0.0f, 0.0f };
+    float3 lightDirection = normalize(worldPosition - light.Position);
+    
+    // Diffuse calculation
+    float3 diffuseTerm =
+		max(dot(normal, -lightDirection), 0.0f) *
+		light.Color * light.Intensity * surfaceColor.xyz;
+    returnLight += diffuseTerm;
+
+	// Specular calculation
+    if (roughness < 1.0f)
+    {
+        float specExponent = (1.0f - roughness) * MAX_SPECULAR_EXPONENT;
+        float3 refl = reflect(lightDirection, normal);
+        float3 viewVector = normalize(cameraPosition - worldPosition);
+        
+        float3 specTerm = pow(max(dot(refl, viewVector), 0.0f), specExponent) *
+            light.Color * light.Intensity * surfaceColor.xyz;
+        
+        returnLight += specTerm;
+    }
+    
+    // Return the resulting point light with attenuation
+    return returnLight * Attenuate(light, worldPosition);
+}
+
+// Calculate spot light
+float3 SpotLight(float3 normal, Light light, float3 worldPosition, float4 surfaceColor)
+{
+    // Get cos(angle) between pixel and light direction
+    float pixelAngle = saturate(dot(normalize(worldPosition - light.Position), normalize(light.Direction)));
+    
+    // Get cosines of angles and calculate range
+    float cosOuter = cos(light.SpotOuterAngle);
+    float cosInner = cos(light.SpotInnerAngle);
+    float falloffRange = cosOuter - cosInner;
+    
+    // Linear falloff over the range, clamp 0-1, apply to light calc
+    float spotTerm = saturate((cosOuter - pixelAngle) / falloffRange);
+    
+    return PointLight(normal, light, worldPosition, surfaceColor) * spotTerm;
 }
 
 // --------------------------------------------------------
@@ -36,14 +124,6 @@ float4 main(VertexToPixel input) : SV_TARGET
 	// Calculate texture coordinates
     input.uv = input.uv * scale + offset;
 
-    //// Sample the normal map
-    //float3 normalFromMap = NormalMap.Sample(BasicSampler, input.uv);
-
-    //// Unpack the normals
-    //normalFromMap = normalFromMap * 2 - 1;
-
-    //input.normal = normalFromMap;
-    
     // Texture
     float4 surfaceColor = SurfaceTexture.Sample(BasicSampler, input.uv);
     surfaceColor *= colorTint;
@@ -52,29 +132,25 @@ float4 main(VertexToPixel input) : SV_TARGET
     float3 totalLight = float3(0.0f, 0.0f, 0.0f);
 
 	// Ambient definition
-    float3 ambientTerm = ambient * surfaceColor;
+    float3 ambientTerm = ambient * surfaceColor.xyz;
+    totalLight += ambientTerm;
 
-	// Diffuse calculation
-    float3 diffuseTerm =
-		max(dot(input.normal, -directionalLight1.Direction), 0.0f) *
-		directionalLight1.Color * directionalLight1.Intensity * surfaceColor;
+    // Sort each light by their type, calculate accordingly, and add to the total light
+    for (int i = 0; i < lightCount; i++)
+    {
+        switch (lights[i].Type)
+        {
+            case LIGHT_TYPE_DIRECTIONAL:
+                totalLight += DirectionalLight(input.normal, lights[i], input.worldPosition, surfaceColor);
+                break;
+            case LIGHT_TYPE_POINT:
+                totalLight += PointLight(input.normal, lights[i], input.worldPosition, surfaceColor);
+                break;
+            case LIGHT_TYPE_SPOT:
+                totalLight += SpotLight(input.normal, lights[i], input.worldPosition, surfaceColor);
+                break;
+        }
+    }
 
-	// Specular calculation
-    float specExponent = (1.0f - roughness) * MAX_SPECULAR_EXPONENT;
-    float3 refl = reflect(directionalLight1.Direction, input.normal);
-    float viewVector = normalize(cameraPosition - input.worldPos);
-
-    float3 specTerm = pow(max(dot(refl, viewVector), 0.0f), specExponent) *
-        directionalLight1.Color * directionalLight1.Intensity * surfaceColor;
-	  
-	// Combine all lights
-    totalLight += ambientTerm + diffuseTerm + specTerm;
-
-    return float4(specTerm, 1);
-
-
-
-	//return float4(1, 1, 1, 1) * colorTint;
-	
-    //return surfaceColor * colorTint;
+    return float4(totalLight, 1);
 }

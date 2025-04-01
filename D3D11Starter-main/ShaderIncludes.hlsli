@@ -9,15 +9,15 @@
 
 struct Light
 {
-    int Type; // Which kind of light? 0, 1 or 2
-    float3 Direction; // Directional and Spot lights need a direction
-    float Range; // Point and Spot lights have a max range for attenuation
-    float3 Position; // Point and Spot lights have a position in space
-    float Intensity; // All lights need an intensity
-    float3 Color; // All lights need a color
-    float SpotInnerAngle; // Inner cone angle (in radians) – Inside this, full light!
-    float SpotOuterAngle; // Outer cone angle (radians) – Outside this, no light!
-    float2 Padding; // Purposefully padding to hit the 16-byte boundary
+    int		Type;			// Which kind of light? 0, 1 or 2
+    float3	Direction;		// Directional and Spot lights need a direction
+    float	Range;			// Point and Spot lights have a max range for attenuation
+    float3	Position;		// Point and Spot lights have a position in space
+    float	Intensity;		// All lights need an intensity
+    float3	Color;			// All lights need a color
+    float	SpotInnerAngle;	// Inner cone angle (in radians) – Inside this, full light!
+    float	SpotOuterAngle; // Outer cone angle (radians) – Outside this, no light!
+    float2	Padding;		// Purposefully padding to hit the 16-byte boundary
 };
 
 // Struct representing a single vertex worth of data
@@ -52,7 +52,7 @@ struct VertexToPixel
 	float4 screenPosition	: SV_POSITION;	// XYZW position (System Value Position)
 	float2 uv				: TEXCOORD;
 	float3 normal			: NORMAL;
-	float3 worldPos			: POSITION;
+	float3 worldPosition	: POSITION;
 };
 
 #endif
