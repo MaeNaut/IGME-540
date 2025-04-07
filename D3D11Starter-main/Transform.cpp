@@ -138,16 +138,7 @@ DirectX::XMFLOAT4X4 Transform::GetWorldMatrix()
 {
 	if (dirty)
 	{
-		// Make translation, rotation, and scale matrices
-		// XMMATRIX trMatrix = XMMatrixTranslationFromVector(XMLoadFloat3(&position));
-		XMMATRIX trMatrix = XMMatrixTranslation(position.x, position.y, position.z);
-		XMMATRIX rotMatrix = XMMatrixRotationRollPitchYaw(pitchYawRoll.x, pitchYawRoll.y, pitchYawRoll.z);
-		XMMATRIX scMatrix = XMMatrixScaling(scale.x, scale.y, scale.z);
-
-		// World matrix is a combination of translation, rotation, and scale matrices
-		XMMATRIX world = scMatrix * rotMatrix * trMatrix;
-		XMStoreFloat4x4(&worldMatrix, world);
-		dirty = false;
+		CalculateWorldMatrix();
 	}
 
 	return worldMatrix;
@@ -157,20 +148,26 @@ DirectX::XMFLOAT4X4 Transform::GetWorldInverseTransposeMatrix()
 {
 	if (dirty)
 	{
-		// Make translation, rotation, and scale matrices
-		// XMMATRIX trMatrix = XMMatrixTranslationFromVector(XMLoadFloat3(&position));
-		XMMATRIX trMatrix = XMMatrixTranslation(position.x, position.y, position.z);
-		XMMATRIX rotMatrix = XMMatrixRotationRollPitchYaw(pitchYawRoll.x, pitchYawRoll.y, pitchYawRoll.z);
-		XMMATRIX scMatrix = XMMatrixScaling(scale.x, scale.y, scale.z);
-
-		// World matrix is a combination of translation, rotation, and scale matrices
-		XMMATRIX world = scMatrix * rotMatrix * trMatrix;
-		XMStoreFloat4x4(&worldInverseTransposeMatrix,
-			XMMatrixInverse(0, XMMatrixTranspose(world)));
-		dirty = false;
+		CalculateWorldMatrix();
 	}
 
 	return worldInverseTransposeMatrix;
+}
+
+void Transform::CalculateWorldMatrix()
+{
+	// Make translation, rotation, and scale matrices
+	// XMMATRIX trMatrix = XMMatrixTranslationFromVector(XMLoadFloat3(&position));
+	XMMATRIX trMatrix = XMMatrixTranslation(position.x, position.y, position.z);
+	XMMATRIX rotMatrix = XMMatrixRotationRollPitchYaw(pitchYawRoll.x, pitchYawRoll.y, pitchYawRoll.z);
+	XMMATRIX scMatrix = XMMatrixScaling(scale.x, scale.y, scale.z);
+
+	// World matrix is a combination of translation, rotation, and scale matrices
+	XMMATRIX world = scMatrix * rotMatrix * trMatrix;
+	XMStoreFloat4x4(&worldMatrix, world);
+	XMStoreFloat4x4(&worldInverseTransposeMatrix,
+		XMMatrixInverse(0, XMMatrixTranspose(world)));
+	dirty = false;
 }
 
 DirectX::XMFLOAT3 Transform::GetRight()

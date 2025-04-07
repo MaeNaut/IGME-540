@@ -32,6 +32,7 @@ public:
 
 	DirectX::XMFLOAT4X4 GetWorldMatrix();
 	DirectX::XMFLOAT4X4 GetWorldInverseTransposeMatrix();
+	void CalculateWorldMatrix();
 
 	// Directions
 	DirectX::XMFLOAT3 GetRight();

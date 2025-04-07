@@ -2,8 +2,9 @@
 
 #define MAX_LIGHTS 128
 
-Texture2D SurfaceTexture  : register(t0);
-SamplerState BasicSampler : register(s0);
+Texture2D SurfaceTexture    : register(t0);
+Texture2D NormalMap         : register(t1);
+SamplerState BasicSampler   : register(s0);
 
 cbuffer ExternalData : register(b0)
 {
@@ -49,6 +50,14 @@ float3 DirectionalLight(float3 normal, Light light, float3 worldPosition, float4
         float3 specTerm = pow(max(dot(refl, viewVector), 0.0f), specExponent) *
             light.Color * light.Intensity * surfaceColor.xyz;
         
+        // Cut the specular if the diffuse contribution is zero
+        // - any() returns 1 if any component of the param is non-zero
+        // - In other words:
+        // - If the diffuse amount is 0, any(diffuse) returns 0
+        // - If the diffuse amount is != 0, any(diffuse) returns 1
+        // - So when diffuse is 0, specular becomes 0
+        specTerm *= any(diffuseTerm);
+
         returnLight += specTerm;
     }
     
@@ -77,6 +86,14 @@ float3 PointLight(float3 normal, Light light, float3 worldPosition, float4 surfa
         
         float3 specTerm = pow(max(dot(refl, viewVector), 0.0f), specExponent) *
             light.Color * light.Intensity * surfaceColor.xyz;
+        
+        // Cut the specular if the diffuse contribution is zero
+        // - any() returns 1 if any component of the param is non-zero
+        // - In other words:
+        // - If the diffuse amount is 0, any(diffuse) returns 0
+        // - If the diffuse amount is != 0, any(diffuse) returns 1
+        // - So when diffuse is 0, specular becomes 0
+        specTerm *= any(diffuseTerm);
         
         returnLight += specTerm;
     }
@@ -113,21 +130,34 @@ float3 SpotLight(float3 normal, Light light, float3 worldPosition, float4 surfac
 // --------------------------------------------------------
 float4 main(VertexToPixel input) : SV_TARGET
 {
-    // Just return the input color
-    // - This color (like most values passing through the rasterizer) is 
-    //   interpolated for each pixel between the corresponding vertices 
-    //   of the triangle we're rendering
-
     // Clean up un-normalized normals and tangents
     input.normal = normalize(input.normal);
-
-	// Calculate texture coordinates
+    input.tangent = normalize(input.tangent);
+    
+    // Calculate texture coordinates
     input.uv = input.uv * scale + offset;
+
+    
+    // Sample and unpack normal
+    float3 unpackedNormal = (NormalMap.Sample(BasicSampler, input.uv).rgb * 2 - 1);
+    unpackedNormal = (unpackedNormal); // Don’t forget to normalize!
+
+    // Feel free to adjust/simplify this code to fit with your existing shader(s)
+    // Simplifications include not re-normalizing the same vector more than once!
+    float3 N = normalize(input.normal); // Must be normalized here or before
+    float3 T = normalize(input.tangent); // Must be normalized here or before
+    T = normalize(T - N * dot(T, N)); // Gram-Schmidt assumes T&N are normalized!
+    float3 B = cross(T, N);
+    float3x3 TBN = float3x3(T, B, N);
+    
+    // Assumes that input.normal is the normal later in the shader
+    input.normal = mul(unpackedNormal, TBN); // Note multiplication order!
+    
 
     // Texture
     float4 surfaceColor = SurfaceTexture.Sample(BasicSampler, input.uv);
     surfaceColor *= colorTint;
-
+    
 	// Total light
     float3 totalLight = float3(0.0f, 0.0f, 0.0f);
 
@@ -151,6 +181,7 @@ float4 main(VertexToPixel input) : SV_TARGET
                 break;
         }
     }
-
+    
+    
     return float4(totalLight, 1);
 }

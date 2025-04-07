@@ -69,6 +69,7 @@ void Game::Initialize()
 
 	// Initialize some fields here
 	ambientColor = { 0.1f, 0.1f, 0.25f };
+	skyboxColor = { 1.0f, 1.0f, 1.0f };
 	light = {};
 }
 
@@ -98,15 +99,28 @@ void Game::CreateGeometry()
 		Graphics::Device, Graphics::Context, FixPath(L"VertexShader.cso").c_str());
 	std::shared_ptr<SimplePixelShader> ps = std::make_shared<SimplePixelShader>(
 		Graphics::Device, Graphics::Context, FixPath(L"PixelShader.cso").c_str());
-	std::shared_ptr<SimplePixelShader> combinePS = std::make_shared<SimplePixelShader>(
-		Graphics::Device, Graphics::Context, FixPath(L"CombinePS.cso").c_str());
 
 
 	// Load textures
 	CreateWICTextureFromFile(Graphics::Device.Get(), Graphics::Context.Get(),
-		FixPath(L"../../Assets/Textures/brick.png").c_str(), nullptr, brickTexture.GetAddressOf());
+		FixPath(L"../../Assets/Textures/cushion.png").c_str(), nullptr, cushionTexture.GetAddressOf());
+	CreateWICTextureFromFile(Graphics::Device.Get(), Graphics::Context.Get(),
+		FixPath(L"../../Assets/Textures/cobblestone.png").c_str(), nullptr, cobblestoneTexture.GetAddressOf());
+	CreateWICTextureFromFile(Graphics::Device.Get(), Graphics::Context.Get(),
+		FixPath(L"../../Assets/Textures/rock.png").c_str(), nullptr, rockTexture.GetAddressOf());
 	CreateWICTextureFromFile(Graphics::Device.Get(), Graphics::Context.Get(),
 		FixPath(L"../../Assets/Textures/onyx.png").c_str(), nullptr, onyxTexture.GetAddressOf());
+
+
+	// Load normal maps
+	CreateWICTextureFromFile(Graphics::Device.Get(), Graphics::Context.Get(),
+		FixPath(L"../../Assets/Textures/cushion_normals.png").c_str(), nullptr, cushionNormal.GetAddressOf());
+	CreateWICTextureFromFile(Graphics::Device.Get(), Graphics::Context.Get(),
+		FixPath(L"../../Assets/Textures/cobblestone_normals.png").c_str(), nullptr, cobblestoneNormal.GetAddressOf());
+	CreateWICTextureFromFile(Graphics::Device.Get(), Graphics::Context.Get(),
+		FixPath(L"../../Assets/Textures/rock_normals.png").c_str(), nullptr, rockNormal.GetAddressOf());
+	CreateWICTextureFromFile(Graphics::Device.Get(), Graphics::Context.Get(),
+		FixPath(L"../../Assets/Textures/flat_normals.png").c_str(), nullptr, flatNormal.GetAddressOf());
 
 
 	// Create a sampler
@@ -122,23 +136,27 @@ void Game::CreateGeometry()
 
 	// Create materials, MUST be done before creating entities
 	colorTint = { 1.0f, 1.0f, 1.0f, 1.0f };
-	std::shared_ptr<Material> mat1 = std::make_shared<Material>(colorTint, vs, ps, 0.0f);
-	mat1->AddTextureSRV("SurfaceTexture", onyxTexture);
+	std::shared_ptr<Material> mat1 = std::make_shared<Material>(colorTint, vs, ps, 0.99f);
+	mat1->AddTextureSRV("SurfaceTexture", cushionTexture);
+	mat1->AddTextureSRV("NormalMap", cushionNormal);
 	mat1->AddSampler("BasicSampler", sampler);
 	materials.push_back(mat1);
 
-	std::shared_ptr<Material> mat2 = std::make_shared<Material>(colorTint, vs, ps, 0.0f);
-	mat2->AddTextureSRV("SurfaceTexture", brickTexture);
+	std::shared_ptr<Material> mat2 = std::make_shared<Material>(colorTint, vs, ps, 0.1f);
+	mat2->AddTextureSRV("SurfaceTexture", cobblestoneTexture);
+	mat2->AddTextureSRV("NormalMap", cobblestoneNormal);
 	mat2->AddSampler("BasicSampler", sampler);
 	materials.push_back(mat2);
 
-	std::shared_ptr<Material> mat3 = std::make_shared<Material>(colorTint, vs, ps, 0.9f);
-	mat3->AddTextureSRV("SurfaceTexture", onyxTexture);
+	std::shared_ptr<Material> mat3 = std::make_shared<Material>(colorTint, vs, ps, 0.99f);
+	mat3->AddTextureSRV("SurfaceTexture", rockTexture);
+	mat3->AddTextureSRV("NormalMap", rockNormal);
 	mat3->AddSampler("BasicSampler", sampler);
 	materials.push_back(mat3);
 
-	std::shared_ptr<Material> mat4 = std::make_shared<Material>(colorTint, vs, ps, 0.9f);
-	mat4->AddTextureSRV("SurfaceTexture", brickTexture);
+	std::shared_ptr<Material> mat4 = std::make_shared<Material>(colorTint, vs, ps, 0.1f);
+	mat4->AddTextureSRV("SurfaceTexture", onyxTexture);
+	mat4->AddTextureSRV("NormalMap", flatNormal);
 	mat4->AddSampler("BasicSampler", sampler);
 	materials.push_back(mat4);
 
@@ -158,7 +176,7 @@ void Game::CreateGeometry()
 	entities.push_back(entity);
 	entity = std::make_shared<GameEntity>(cube, mat2);
 	entities.push_back(entity);
-	entity = std::make_shared<GameEntity>(torus, mat3);
+	entity = std::make_shared<GameEntity>(sphere, mat3);
 	entities.push_back(entity);
 	entity = std::make_shared<GameEntity>(quad, mat4);
 	entities.push_back(entity);
@@ -206,6 +224,10 @@ void Game::CreateGeometry()
 	light.SpotInnerAngle = 3.14f / 45.0f;
 	light.SpotOuterAngle = 3.14f / 40.0f;
 	lights.push_back(light);
+
+
+	// Create Skybox
+	skybox = std::make_shared<Sky>(cube, sampler, FixPath(L"../../Assets/Skybox/").c_str());
 }
 
 
@@ -268,19 +290,26 @@ void Game::Draw(float deltaTime, float totalTime)
 
 	// Draw Geometry
 	{
-		// Entities
+		// Entities & Skybox
 		for (std::shared_ptr cam : cameras)
 		{
 			if (cam->IsActive())
 			{
+				XMFLOAT3 ambient = XMFLOAT3(
+					ambientColor.x * skyboxColor.x,
+					ambientColor.y * skyboxColor.y,
+					ambientColor.z * skyboxColor.z);
+
 				for (std::shared_ptr ge : entities)
 				{
-					ge->GetMaterial()->GetPS()->SetFloat3("ambient", ambientColor);
+					ge->GetMaterial()->GetPS()->SetFloat3("ambient", ambient);
 					ge->GetMaterial()->GetPS()->SetData("lights", &lights[0], sizeof(Light) * (int)lights.size());
 					ge->GetMaterial()->GetPS()->SetInt("lightCount", (int)lights.size());
 					ge->GetMaterial()->BindResources();
 					ge->Draw(cam);
 				}
+
+				skybox->Draw(cam);
 			}
 		}
 	}

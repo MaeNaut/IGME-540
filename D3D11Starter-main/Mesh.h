@@ -27,6 +27,7 @@ public:
 
 	// Helper function
 	void CreateBuffer(Vertex vertices[], unsigned int indices[]);
+	void CalculateTangents(Vertex* verts, int numVerts, unsigned int* indices, int numIndices);
 
 	void Draw();
 };

@@ -5,6 +5,7 @@
 #include "Camera.h"
 #include "SimpleShader.h"
 #include "Lights.h"
+#include "Sky.h"
 
 #include <d3d11.h>
 #include <wrl/client.h>
@@ -56,12 +57,22 @@ private:
 
 	// Fields for textures
 	std::vector<std::shared_ptr<Material>> materials;
-	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> brickTexture;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> cobblestoneTexture;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> cushionTexture;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> rockTexture;
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> onyxTexture;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> cobblestoneNormal;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> cushionNormal;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> rockNormal;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> flatNormal;
 	Microsoft::WRL::ComPtr<ID3D11SamplerState> sampler;
 
 	// Fields for lighting
 	DirectX::XMFLOAT3 ambientColor;
+	DirectX::XMFLOAT3 skyboxColor;
 	Light light;
 	std::vector<Light> lights;
+
+	// Fields for skybox
+	std::shared_ptr<Sky> skybox;
 };
