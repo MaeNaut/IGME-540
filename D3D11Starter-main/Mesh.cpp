@@ -12,6 +12,7 @@ Mesh::Mesh(Vertex vertices[], unsigned int indices[], int _vertexCount, int _ind
 {
 	vertexCount = _vertexCount;
 	indexCount = _indexCount;
+	CalculateTangents(vertices, _vertexCount, indices, _indexCount);
 	CreateBuffer(vertices, indices);
 }
 

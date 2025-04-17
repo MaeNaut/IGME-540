@@ -2,8 +2,10 @@
 
 #define MAX_LIGHTS 128
 
-Texture2D SurfaceTexture    : register(t0);
+Texture2D Albedo            : register(t0);
 Texture2D NormalMap         : register(t1);
+Texture2D RoughnessMap : register(t2);
+Texture2D MetalnessMap : register(t3);
 SamplerState BasicSampler   : register(s0);
 
 cbuffer ExternalData : register(b0)
@@ -14,7 +16,6 @@ cbuffer ExternalData : register(b0)
     
     float roughness;
     float3 cameraPosition;
-    float3 ambient;
     
     Light lights[MAX_LIGHTS];
     int lightCount;
@@ -29,81 +30,50 @@ float Attenuate(Light light, float3 worldPos)
 }
 
 // Calculate directional light
-float3 DirectionalLight(float3 normal, Light light, float3 worldPosition, float4 surfaceColor)
+float3 DirectionalLight(float3 normal, Light light, float3 worldPosition, float3 surfaceColor, float roughness, float3 specularColor, float metalness)
 {
-    float3 returnLight = { 0.0f, 0.0f, 0.0f };
     float3 lightDirection = normalize(light.Direction);
+    float3 viewVector = normalize(cameraPosition - worldPosition);
     
-    // Diffuse calculation
-    float3 diffuseTerm =
-		max(dot(normal, -lightDirection), 0.0f) *
-		light.Color * light.Intensity * surfaceColor.xyz;
-    returnLight += diffuseTerm;
-
-	// Specular calculation
-    if (roughness < 1.0f)
-    {
-        float specExponent = (1.0f - roughness) * MAX_SPECULAR_EXPONENT;
-        float3 refl = reflect(lightDirection, normal);
-        float3 viewVector = normalize(cameraPosition - worldPosition);
-        
-        float3 specTerm = pow(max(dot(refl, viewVector), 0.0f), specExponent) *
-            light.Color * light.Intensity * surfaceColor.xyz;
-        
-        // Cut the specular if the diffuse contribution is zero
-        // - any() returns 1 if any component of the param is non-zero
-        // - In other words:
-        // - If the diffuse amount is 0, any(diffuse) returns 0
-        // - If the diffuse amount is != 0, any(diffuse) returns 1
-        // - So when diffuse is 0, specular becomes 0
-        specTerm *= any(diffuseTerm);
-
-        returnLight += specTerm;
-    }
+    // Calculate the light amounts
+    float diff = DiffusePBR(normal, -lightDirection);
+    float3 F;
+    float3 spec = MicrofacetBRDF(normal, -lightDirection, viewVector, roughness, specularColor, F);
+    
+    // Calculate diffuse with energy conservation, including cutting diffuse for metals
+    float3 balancedDiff = DiffuseEnergyConserve(diff, F, metalness);
+    
+    // Combine the final diffuse and specular values for this light
+    float3 returnLight = (balancedDiff * surfaceColor + spec) * light.Intensity * light.Color;
     
     // Return the resulting directional light
     return returnLight;
 }
 
 // Calculate point light
-float3 PointLight(float3 normal, Light light, float3 worldPosition, float4 surfaceColor)
+float3 PointLight(float3 normal, Light light, float3 worldPosition, float3 surfaceColor, float roughness, float3 specularColor, float metalness)
 {
-    float3 returnLight = { 0.0f, 0.0f, 0.0f };
     float3 lightDirection = normalize(worldPosition - light.Position);
+    float3 viewVector = normalize(cameraPosition - worldPosition);
     
-    // Diffuse calculation
-    float3 diffuseTerm =
-		max(dot(normal, -lightDirection), 0.0f) *
-		light.Color * light.Intensity * surfaceColor.xyz;
-    returnLight += diffuseTerm;
-
-	// Specular calculation
-    if (roughness < 1.0f)
-    {
-        float specExponent = (1.0f - roughness) * MAX_SPECULAR_EXPONENT;
-        float3 refl = reflect(lightDirection, normal);
-        float3 viewVector = normalize(cameraPosition - worldPosition);
-        
-        float3 specTerm = pow(max(dot(refl, viewVector), 0.0f), specExponent) *
-            light.Color * light.Intensity * surfaceColor.xyz;
-        
-        // Cut the specular if the diffuse contribution is zero
-        // - any() returns 1 if any component of the param is non-zero
-        // - In other words:
-        // - If the diffuse amount is 0, any(diffuse) returns 0
-        // - If the diffuse amount is != 0, any(diffuse) returns 1
-        // - So when diffuse is 0, specular becomes 0
-        specTerm *= any(diffuseTerm);
-        
-        returnLight += specTerm;
-    }
+    // Calculate the light amounts
+    float diff = DiffusePBR(normal, -lightDirection);
+    float3 F;
+    float3 spec = MicrofacetBRDF(normal, -lightDirection, viewVector, roughness, specularColor, F);
     
-    // Return the resulting point light with attenuation
+    // Calculate diffuse with energy conservation, including cutting diffuse for metals
+    float3 balancedDiff = DiffuseEnergyConserve(diff, F, metalness);
+    
+    // Combine the final diffuse and specular values for this light
+    float3 returnLight = (balancedDiff * surfaceColor + spec) * light.Intensity * light.Color;
+    
+    // Return the resulting directional light
     return returnLight * Attenuate(light, worldPosition);
+
 }
 
 // Calculate spot light
-float3 SpotLight(float3 normal, Light light, float3 worldPosition, float4 surfaceColor)
+float3 SpotLight(float3 normal, Light light, float3 worldPosition, float3 surfaceColor, float roughness, float3 specularColor, float metalness)
 {
     // Get cos(angle) between pixel and light direction
     float pixelAngle = saturate(dot(normalize(worldPosition - light.Position), normalize(light.Direction)));
@@ -116,7 +86,7 @@ float3 SpotLight(float3 normal, Light light, float3 worldPosition, float4 surfac
     // Linear falloff over the range, clamp 0-1, apply to light calc
     float spotTerm = saturate((cosOuter - pixelAngle) / falloffRange);
     
-    return PointLight(normal, light, worldPosition, surfaceColor) * spotTerm;
+    return PointLight(normal, light, worldPosition, surfaceColor, roughness, specularColor, metalness) * spotTerm;
 }
 
 // --------------------------------------------------------
@@ -155,15 +125,20 @@ float4 main(VertexToPixel input) : SV_TARGET
     
 
     // Texture
-    float4 surfaceColor = SurfaceTexture.Sample(BasicSampler, input.uv);
-    surfaceColor *= colorTint;
+    float3 surfaceColor = pow(Albedo.Sample(BasicSampler, input.uv).rgb, 2.2f);
+    surfaceColor *= colorTint.rgb;
     
+    // Roughness & Metalness
+    float roughness = RoughnessMap.Sample(BasicSampler, input.uv).r;
+    float metalness = MetalnessMap.Sample(BasicSampler, input.uv).r;
+    //float roughness = 0.3f;
+    //float metalness = 1.0f;
+    
+    // Specular color
+    float3 specularColor = lerp(F0_NON_METAL, surfaceColor.rgb, metalness);
+
 	// Total light
     float3 totalLight = float3(0.0f, 0.0f, 0.0f);
-
-	// Ambient definition
-    float3 ambientTerm = ambient * surfaceColor.xyz;
-    totalLight += ambientTerm;
 
     // Sort each light by their type, calculate accordingly, and add to the total light
     for (int i = 0; i < lightCount; i++)
@@ -171,17 +146,17 @@ float4 main(VertexToPixel input) : SV_TARGET
         switch (lights[i].Type)
         {
             case LIGHT_TYPE_DIRECTIONAL:
-                totalLight += DirectionalLight(input.normal, lights[i], input.worldPosition, surfaceColor);
+                totalLight += DirectionalLight(input.normal, lights[i], input.worldPosition, surfaceColor, roughness, specularColor, metalness);
                 break;
             case LIGHT_TYPE_POINT:
-                totalLight += PointLight(input.normal, lights[i], input.worldPosition, surfaceColor);
+                totalLight += PointLight(input.normal, lights[i], input.worldPosition, surfaceColor, roughness, specularColor, metalness);
                 break;
             case LIGHT_TYPE_SPOT:
-                totalLight += SpotLight(input.normal, lights[i], input.worldPosition, surfaceColor);
+                totalLight += SpotLight(input.normal, lights[i], input.worldPosition, surfaceColor, roughness, specularColor, metalness);
                 break;
         }
     }
     
     
-    return float4(totalLight, 1);
+    return float4(pow(totalLight, 1.0 / 2.2f), 1);
 }

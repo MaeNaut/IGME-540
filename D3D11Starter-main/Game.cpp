@@ -59,7 +59,7 @@ void Game::Initialize()
 	
 
 	// Create the cameras for game
-	camera = std::make_shared<Camera>(Window::AspectRatio(), 0.0f, 0.0f, -20.0f, 45.0f, true);
+	camera = std::make_shared<Camera>(Window::AspectRatio(), 0.0f, 0.0f, -15.0f, 45.0f, true);
 	cameras.push_back(camera);
 	camera = std::make_shared<Camera>(Window::AspectRatio(), 2.0f, 0.0f, -2.0f, 60.0f, false);
 	cameras.push_back(camera);
@@ -103,24 +103,67 @@ void Game::CreateGeometry()
 
 	// Load textures
 	CreateWICTextureFromFile(Graphics::Device.Get(), Graphics::Context.Get(),
-		FixPath(L"../../Assets/Textures/cushion.png").c_str(), nullptr, cushionTexture.GetAddressOf());
+		FixPath(L"../../Assets/Textures/bronze_albedo.png").c_str(), nullptr, bronzeAlbedo.GetAddressOf());
 	CreateWICTextureFromFile(Graphics::Device.Get(), Graphics::Context.Get(),
-		FixPath(L"../../Assets/Textures/cobblestone.png").c_str(), nullptr, cobblestoneTexture.GetAddressOf());
+		FixPath(L"../../Assets/Textures/cobblestone_albedo.png").c_str(), nullptr, cobblestoneAlbedo.GetAddressOf());
 	CreateWICTextureFromFile(Graphics::Device.Get(), Graphics::Context.Get(),
-		FixPath(L"../../Assets/Textures/rock.png").c_str(), nullptr, rockTexture.GetAddressOf());
+		FixPath(L"../../Assets/Textures/floor_albedo.png").c_str(), nullptr, floorAlbedo.GetAddressOf());
 	CreateWICTextureFromFile(Graphics::Device.Get(), Graphics::Context.Get(),
-		FixPath(L"../../Assets/Textures/onyx.png").c_str(), nullptr, onyxTexture.GetAddressOf());
-
+		FixPath(L"../../Assets/Textures/paint_albedo.png").c_str(), nullptr, paintAlbedo.GetAddressOf());
+	CreateWICTextureFromFile(Graphics::Device.Get(), Graphics::Context.Get(),
+		FixPath(L"../../Assets/Textures/rough_albedo.png").c_str(), nullptr, roughAlbedo.GetAddressOf());
+	CreateWICTextureFromFile(Graphics::Device.Get(), Graphics::Context.Get(),
+		FixPath(L"../../Assets/Textures/scratched_albedo.png").c_str(), nullptr, scratchedAlbedo.GetAddressOf());
+	CreateWICTextureFromFile(Graphics::Device.Get(), Graphics::Context.Get(),
+		FixPath(L"../../Assets/Textures/wood_albedo.png").c_str(), nullptr, woodAlbedo.GetAddressOf());
 
 	// Load normal maps
 	CreateWICTextureFromFile(Graphics::Device.Get(), Graphics::Context.Get(),
-		FixPath(L"../../Assets/Textures/cushion_normals.png").c_str(), nullptr, cushionNormal.GetAddressOf());
+		FixPath(L"../../Assets/Textures/bronze_normals.png").c_str(), nullptr, bronzeNormal.GetAddressOf());
 	CreateWICTextureFromFile(Graphics::Device.Get(), Graphics::Context.Get(),
 		FixPath(L"../../Assets/Textures/cobblestone_normals.png").c_str(), nullptr, cobblestoneNormal.GetAddressOf());
 	CreateWICTextureFromFile(Graphics::Device.Get(), Graphics::Context.Get(),
-		FixPath(L"../../Assets/Textures/rock_normals.png").c_str(), nullptr, rockNormal.GetAddressOf());
+		FixPath(L"../../Assets/Textures/floor_normals.png").c_str(), nullptr, floorNormal.GetAddressOf());
 	CreateWICTextureFromFile(Graphics::Device.Get(), Graphics::Context.Get(),
-		FixPath(L"../../Assets/Textures/flat_normals.png").c_str(), nullptr, flatNormal.GetAddressOf());
+		FixPath(L"../../Assets/Textures/paint_normals.png").c_str(), nullptr, paintNormal.GetAddressOf());
+	CreateWICTextureFromFile(Graphics::Device.Get(), Graphics::Context.Get(),
+		FixPath(L"../../Assets/Textures/rough_normals.png").c_str(), nullptr, roughNormal.GetAddressOf());
+	CreateWICTextureFromFile(Graphics::Device.Get(), Graphics::Context.Get(),
+		FixPath(L"../../Assets/Textures/scratched_normals.png").c_str(), nullptr, scratchedNormal.GetAddressOf());
+	CreateWICTextureFromFile(Graphics::Device.Get(), Graphics::Context.Get(),
+		FixPath(L"../../Assets/Textures/wood_normals.png").c_str(), nullptr, woodNormal.GetAddressOf());
+
+	// Load roughness maps
+	CreateWICTextureFromFile(Graphics::Device.Get(), Graphics::Context.Get(),
+		FixPath(L"../../Assets/Textures/bronze_roughness.png").c_str(), nullptr, bronzeRoughness.GetAddressOf());
+	CreateWICTextureFromFile(Graphics::Device.Get(), Graphics::Context.Get(),
+		FixPath(L"../../Assets/Textures/cobblestone_roughness.png").c_str(), nullptr, cobblestoneRoughness.GetAddressOf());
+	CreateWICTextureFromFile(Graphics::Device.Get(), Graphics::Context.Get(),
+		FixPath(L"../../Assets/Textures/floor_roughness.png").c_str(), nullptr, floorRoughness.GetAddressOf());
+	CreateWICTextureFromFile(Graphics::Device.Get(), Graphics::Context.Get(),
+		FixPath(L"../../Assets/Textures/paint_roughness.png").c_str(), nullptr, paintRoughness.GetAddressOf());
+	CreateWICTextureFromFile(Graphics::Device.Get(), Graphics::Context.Get(),
+		FixPath(L"../../Assets/Textures/rough_roughness.png").c_str(), nullptr, roughRoughness.GetAddressOf());
+	CreateWICTextureFromFile(Graphics::Device.Get(), Graphics::Context.Get(),
+		FixPath(L"../../Assets/Textures/scratched_roughness.png").c_str(), nullptr, scratchedRoughness.GetAddressOf());
+	CreateWICTextureFromFile(Graphics::Device.Get(), Graphics::Context.Get(),
+		FixPath(L"../../Assets/Textures/wood_roughness.png").c_str(), nullptr, woodRoughness.GetAddressOf());
+
+	// Load metalness maps
+	CreateWICTextureFromFile(Graphics::Device.Get(), Graphics::Context.Get(),
+		FixPath(L"../../Assets/Textures/bronze_metal.png").c_str(), nullptr, bronzeMetal.GetAddressOf());
+	CreateWICTextureFromFile(Graphics::Device.Get(), Graphics::Context.Get(),
+		FixPath(L"../../Assets/Textures/cobblestone_metal.png").c_str(), nullptr, cobblestoneMetal.GetAddressOf());
+	CreateWICTextureFromFile(Graphics::Device.Get(), Graphics::Context.Get(),
+		FixPath(L"../../Assets/Textures/floor_metal.png").c_str(), nullptr, floorMetal.GetAddressOf());
+	CreateWICTextureFromFile(Graphics::Device.Get(), Graphics::Context.Get(),
+		FixPath(L"../../Assets/Textures/paint_metal.png").c_str(), nullptr, paintMetal.GetAddressOf());
+	CreateWICTextureFromFile(Graphics::Device.Get(), Graphics::Context.Get(),
+		FixPath(L"../../Assets/Textures/rough_metal.png").c_str(), nullptr, roughMetal.GetAddressOf());
+	CreateWICTextureFromFile(Graphics::Device.Get(), Graphics::Context.Get(),
+		FixPath(L"../../Assets/Textures/scratched_metal.png").c_str(), nullptr, scratchedMetal.GetAddressOf());
+	CreateWICTextureFromFile(Graphics::Device.Get(), Graphics::Context.Get(),
+		FixPath(L"../../Assets/Textures/wood_metal.png").c_str(), nullptr, woodMetal.GetAddressOf());
 
 
 	// Create a sampler
@@ -137,92 +180,105 @@ void Game::CreateGeometry()
 	// Create materials, MUST be done before creating entities
 	colorTint = { 1.0f, 1.0f, 1.0f, 1.0f };
 	std::shared_ptr<Material> mat1 = std::make_shared<Material>(colorTint, vs, ps, 0.99f);
-	mat1->AddTextureSRV("SurfaceTexture", cushionTexture);
-	mat1->AddTextureSRV("NormalMap", cushionNormal);
+	mat1->AddTextureSRV("Albedo", bronzeAlbedo);
+	mat1->AddTextureSRV("NormalMap", bronzeNormal);
+	mat1->AddTextureSRV("RoughnessMap", bronzeRoughness);
+	mat1->AddTextureSRV("MetalnessMap", bronzeMetal);
 	mat1->AddSampler("BasicSampler", sampler);
 	materials.push_back(mat1);
 
 	std::shared_ptr<Material> mat2 = std::make_shared<Material>(colorTint, vs, ps, 0.1f);
-	mat2->AddTextureSRV("SurfaceTexture", cobblestoneTexture);
+	mat2->AddTextureSRV("Albedo", cobblestoneAlbedo);
 	mat2->AddTextureSRV("NormalMap", cobblestoneNormal);
+	mat2->AddTextureSRV("RoughnessMap", cobblestoneRoughness);
+	mat2->AddTextureSRV("MetalnessMap", cobblestoneMetal);
 	mat2->AddSampler("BasicSampler", sampler);
 	materials.push_back(mat2);
 
 	std::shared_ptr<Material> mat3 = std::make_shared<Material>(colorTint, vs, ps, 0.99f);
-	mat3->AddTextureSRV("SurfaceTexture", rockTexture);
-	mat3->AddTextureSRV("NormalMap", rockNormal);
+	mat3->AddTextureSRV("Albedo", floorAlbedo);
+	mat3->AddTextureSRV("NormalMap", floorNormal);
+	mat3->AddTextureSRV("RoughnessMap", floorRoughness);
+	mat3->AddTextureSRV("MetalnessMap", floorMetal);
 	mat3->AddSampler("BasicSampler", sampler);
 	materials.push_back(mat3);
 
 	std::shared_ptr<Material> mat4 = std::make_shared<Material>(colorTint, vs, ps, 0.1f);
-	mat4->AddTextureSRV("SurfaceTexture", onyxTexture);
-	mat4->AddTextureSRV("NormalMap", flatNormal);
+	mat4->AddTextureSRV("Albedo", paintAlbedo);
+	mat4->AddTextureSRV("NormalMap", paintNormal);
+	mat4->AddTextureSRV("RoughnessMap", paintRoughness);
+	mat4->AddTextureSRV("MetalnessMap", paintMetal);
 	mat4->AddSampler("BasicSampler", sampler);
 	materials.push_back(mat4);
+
+	std::shared_ptr<Material> mat5 = std::make_shared<Material>(colorTint, vs, ps, 0.1f);
+	mat5->AddTextureSRV("Albedo", roughAlbedo);
+	mat5->AddTextureSRV("NormalMap", roughNormal);
+	mat5->AddTextureSRV("RoughnessMap", roughRoughness);
+	mat5->AddTextureSRV("MetalnessMap", roughMetal);
+	mat5->AddSampler("BasicSampler", sampler);
+	materials.push_back(mat5);
+
+	std::shared_ptr<Material> mat6 = std::make_shared<Material>(colorTint, vs, ps, 0.99f);
+	mat6->AddTextureSRV("Albedo", scratchedAlbedo);
+	mat6->AddTextureSRV("NormalMap", scratchedNormal);
+	mat6->AddTextureSRV("RoughnessMap", scratchedRoughness);
+	mat6->AddTextureSRV("MetalnessMap", scratchedMetal);
+	mat6->AddSampler("BasicSampler", sampler);
+	materials.push_back(mat6);
+
+	std::shared_ptr<Material> mat7 = std::make_shared<Material>(colorTint, vs, ps, 0.1f);
+	mat7->AddTextureSRV("Albedo", woodAlbedo);
+	mat7->AddTextureSRV("NormalMap", woodNormal);
+	mat7->AddTextureSRV("RoughnessMap", woodRoughness);
+	mat7->AddTextureSRV("MetalnessMap", woodMetal);
+	mat7->AddSampler("BasicSampler", sampler);
+	materials.push_back(mat7);
+
 
 	// Load meshes from obj files
 	sphere = std::make_shared<Mesh>(FixPath("../../Assets/Models/sphere.obj").c_str());
 	meshes.push_back(sphere);
 	cube = std::make_shared<Mesh>(FixPath("../../Assets/Models/cube.obj").c_str());
 	meshes.push_back(cube);
-	torus = std::make_shared<Mesh>(FixPath("../../Assets/Models/torus.obj").c_str());
-	meshes.push_back(torus);
-	quad = std::make_shared<Mesh>(FixPath("../../Assets/Models/quad_double_sided.obj").c_str());
-	meshes.push_back(quad);
 
 
 	// Create entities
 	entity = std::make_shared<GameEntity>(sphere, mat1);
 	entities.push_back(entity);
-	entity = std::make_shared<GameEntity>(cube, mat2);
+	entity = std::make_shared<GameEntity>(sphere, mat2);
 	entities.push_back(entity);
 	entity = std::make_shared<GameEntity>(sphere, mat3);
 	entities.push_back(entity);
-	entity = std::make_shared<GameEntity>(quad, mat4);
+	entity = std::make_shared<GameEntity>(sphere, mat4);
+	entities.push_back(entity);
+	entity = std::make_shared<GameEntity>(sphere, mat5);
+	entities.push_back(entity);
+	entity = std::make_shared<GameEntity>(sphere, mat6);
+	entities.push_back(entity);
+	entity = std::make_shared<GameEntity>(sphere, mat7);
 	entities.push_back(entity);
 
 
 	// Set appropriate positions for each entity
 	for (int i = 0; i < entities.size(); i++)
 	{
-		entities[i]->GetTransform()->MoveAbsolute(i * 3.0f, 0.0f, 0.0f);
+		entities[i]->GetTransform()->MoveAbsolute(i * 2.0f - entities.size() + 1.5f, 0.0f, 0.0f);
 	}
 
 
 	// Create lights
 	light.Type = 0;
-	light.Direction = { 1.0f, 0.0f, 0.0f };
-	light.Color = { 1.0f, 0.0f, 0.0f };
-	light.Intensity = 1.0f;
-	lights.push_back(light);
-
-	light.Type = 0;
-	light.Direction = { 0.0f, 1.0f, 0.0f };
-	light.Color = { 0.0f, 1.0f, 0.0f };
-	light.Intensity = 1.0f;
-	lights.push_back(light);
-
-	light.Type = 0;
-	light.Direction = { 0.0f, 0.0f, 1.0f };
-	light.Color = { 0.0f, 0.0f, 1.0f };
+	light.Direction = { 1.0f, -1.0f, 0.0f };
+	light.Color = { 1.0f, 1.0f, 1.0f };
 	light.Intensity = 1.0f;
 	lights.push_back(light);
 
 	light.Type = 1;
 	light.Range = 20.0f;
-	light.Position = { 6.0f, 3.0f, -3.0f };
+	light.Position = { 0.0f, 3.0f, -3.0f };
 	light.Color = { 1.0f, 1.0f, 1.0f };
 	light.Intensity = 1.0f;
-	lights.push_back(light);
-
-	light.Type = 2;
-	light.Direction = { 0.0f, -1.0f, 0.0f };
-	light.Range = 20.0f;
-	light.Position = { 9.0f, 10.0f, 0.0f };
-	light.Color = { 1.0f, 1.0f, 1.0f };
-	light.Intensity = 1.0f;
-	light.SpotInnerAngle = 3.14f / 45.0f;
-	light.SpotOuterAngle = 3.14f / 40.0f;
 	lights.push_back(light);
 
 
@@ -295,14 +351,8 @@ void Game::Draw(float deltaTime, float totalTime)
 		{
 			if (cam->IsActive())
 			{
-				XMFLOAT3 ambient = XMFLOAT3(
-					ambientColor.x * skyboxColor.x,
-					ambientColor.y * skyboxColor.y,
-					ambientColor.z * skyboxColor.z);
-
 				for (std::shared_ptr ge : entities)
 				{
-					ge->GetMaterial()->GetPS()->SetFloat3("ambient", ambient);
 					ge->GetMaterial()->GetPS()->SetData("lights", &lights[0], sizeof(Light) * (int)lights.size());
 					ge->GetMaterial()->GetPS()->SetInt("lightCount", (int)lights.size());
 					ge->GetMaterial()->BindResources();

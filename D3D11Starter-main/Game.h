@@ -43,8 +43,6 @@ private:
 	// Mesh fields
 	std::shared_ptr<Mesh> sphere;
 	std::shared_ptr<Mesh> cube;
-	std::shared_ptr<Mesh> torus;
-	std::shared_ptr<Mesh> quad;
 	std::vector<std::shared_ptr<Mesh>> meshes;
 
 	// Entity fields
@@ -57,15 +55,43 @@ private:
 
 	// Fields for textures
 	std::vector<std::shared_ptr<Material>> materials;
-	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> cobblestoneTexture;
-	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> cushionTexture;
-	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> rockTexture;
-	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> onyxTexture;
-	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> cobblestoneNormal;
-	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> cushionNormal;
-	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> rockNormal;
-	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> flatNormal;
 	Microsoft::WRL::ComPtr<ID3D11SamplerState> sampler;
+
+	// Albedos
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> bronzeAlbedo;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> cobblestoneAlbedo;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> floorAlbedo;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> paintAlbedo;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> roughAlbedo;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> scratchedAlbedo;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> woodAlbedo;
+
+	// Normal maps
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> bronzeNormal;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> cobblestoneNormal;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> floorNormal;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> paintNormal;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> roughNormal;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> scratchedNormal;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> woodNormal;
+
+	// Roughness maps
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> bronzeRoughness;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> cobblestoneRoughness ;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> floorRoughness;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> paintRoughness;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> roughRoughness;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> scratchedRoughness;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> woodRoughness;
+
+	// Metal maps
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> bronzeMetal;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> cobblestoneMetal;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> floorMetal;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> paintMetal;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> roughMetal;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> scratchedMetal;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> woodMetal;
 
 	// Fields for lighting
 	DirectX::XMFLOAT3 ambientColor;
