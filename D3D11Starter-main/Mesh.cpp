@@ -233,6 +233,7 @@ Mesh::Mesh(const char* objFile)
 
 	indexCount = indexCounter;
 	vertexCount = vertCounter;
+	CalculateTangents(&verts[0], vertexCount, &indices[0], indexCount);
 	CreateBuffer(&verts[0], &indices[0]);
 
 	// Close the file and create the actual buffers
