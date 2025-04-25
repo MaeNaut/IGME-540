@@ -2,11 +2,13 @@
 
 #define MAX_LIGHTS 128
 
-Texture2D Albedo            : register(t0);
-Texture2D NormalMap         : register(t1);
-Texture2D RoughnessMap : register(t2);
-Texture2D MetalnessMap : register(t3);
-SamplerState BasicSampler   : register(s0);
+Texture2D Albedo                        : register(t0);
+Texture2D NormalMap                     : register(t1);
+Texture2D RoughnessMap                  : register(t2);
+Texture2D MetalnessMap                  : register(t3);
+Texture2D ShadowMap                     : register(t4);
+SamplerState BasicSampler               : register(s0);
+SamplerComparisonState ShadowSampler    : register(s1);
 
 cbuffer ExternalData : register(b0)
 {
@@ -106,7 +108,7 @@ float4 main(VertexToPixel input) : SV_TARGET
     
     // Calculate texture coordinates
     input.uv = input.uv * scale + offset;
-
+    
     
     // Sample and unpack normal
     float3 unpackedNormal = (NormalMap.Sample(BasicSampler, input.uv).rgb * 2 - 1);
@@ -140,17 +142,41 @@ float4 main(VertexToPixel input) : SV_TARGET
 	// Total light
     float3 totalLight = float3(0.0f, 0.0f, 0.0f);
 
+    // Perform the perspective divide (divide by W) ourselves
+    input.shadowMapPos /= input.shadowMapPos.w;
+    // Convert the normalized device coordinates to UVs for sampling
+    float2 shadowUV = input.shadowMapPos.xy * 0.5f + 0.5f;
+    shadowUV.y = 1 - shadowUV.y; // Flip the Y
+    // Grab the distances we need: light-to-pixel and closest-surface
+    float distToLight = input.shadowMapPos.z;
+    // Get a ratio of comparison results using SampleCmpLevelZero()
+    float shadowAmount = ShadowMap.SampleCmpLevelZero(
+        ShadowSampler,
+        shadowUV,
+        distToLight).r;
+    
     // Sort each light by their type, calculate accordingly, and add to the total light
     for (int i = 0; i < lightCount; i++)
     {
         switch (lights[i].Type)
         {
             case LIGHT_TYPE_DIRECTIONAL:
-                totalLight += DirectionalLight(input.normal, lights[i], input.worldPosition, surfaceColor, roughness, specularColor, metalness);
+                float3 lightResult = DirectionalLight(input.normal, lights[i], input.worldPosition, surfaceColor, roughness, specularColor, metalness);
+            
+                // If this is the first light, apply the shadowing result
+                if (i == 0)
+                {
+                    lightResult *= shadowAmount;
+                }
+            
+                // Add this light's result to the total light for this pixel
+                totalLight += lightResult;
                 break;
+            
             case LIGHT_TYPE_POINT:
                 totalLight += PointLight(input.normal, lights[i], input.worldPosition, surfaceColor, roughness, specularColor, metalness);
                 break;
+            
             case LIGHT_TYPE_SPOT:
                 totalLight += SpotLight(input.normal, lights[i], input.worldPosition, surfaceColor, roughness, specularColor, metalness);
                 break;

@@ -33,6 +33,8 @@ public:
 private:
 	// Initialization helper methods - feel free to customize, combine, remove, etc.
 	void CreateGeometry();
+	void CreateLight();
+	void CreateShadow();
 
 	// Fields for UI
 	bool show_demo_window = false;
@@ -41,8 +43,13 @@ private:
 	DirectX::XMFLOAT4 colorTint;
 
 	// Mesh fields
-	std::shared_ptr<Mesh> sphere;
 	std::shared_ptr<Mesh> cube;
+	std::shared_ptr<Mesh> cylinder;
+	std::shared_ptr<Mesh> helix;
+	std::shared_ptr<Mesh> quad;
+	std::shared_ptr<Mesh> quad_double_sided;
+	std::shared_ptr<Mesh> sphere;
+	std::shared_ptr<Mesh> torus;
 	std::vector<std::shared_ptr<Mesh>> meshes;
 
 	// Entity fields
@@ -98,7 +105,19 @@ private:
 	DirectX::XMFLOAT3 skyboxColor;
 	Light light;
 	std::vector<Light> lights;
+	DirectX::XMFLOAT3 directionalLightDirection;
 
 	// Fields for skybox
 	std::shared_ptr<Sky> skybox;
+
+	// Shadow mapping resources
+	Microsoft::WRL::ComPtr<ID3D11DepthStencilView> shadowDSV;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> shadowSRV;
+	Microsoft::WRL::ComPtr<ID3D11RasterizerState> shadowRasterizer;
+	Microsoft::WRL::ComPtr<ID3D11SamplerState> shadowSampler;
+	DirectX::XMFLOAT4X4 lightViewMatrix;
+	DirectX::XMFLOAT4X4 lightProjectionMatrix;
+	DirectX::XMVECTOR lightDirection;
+	float lightProjectionSize;
+	int shadowMapResolution;
 };
