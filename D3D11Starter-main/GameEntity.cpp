@@ -45,8 +45,7 @@ void GameEntity::Draw(std::shared_ptr<Camera> camera)
 	vs->SetMatrix4x4("worldInvTrans", transform->GetWorldInverseTransposeMatrix());
 	vs->SetMatrix4x4("view", camera->GetView());
 	vs->SetMatrix4x4("projection", camera->GetProjection());
-
-	vs->CopyAllBufferData(); // Adjust the “vs” variable here as necessary
+	vs->CopyAllBufferData();
 
 	// Same for the pixel shader
 	ps->SetFloat4("colorTint", material->GetColorTint());

@@ -35,6 +35,7 @@ private:
 	void CreateGeometry();
 	void CreateLight();
 	void CreateShadow();
+	void CreatePostProcess();
 
 	// Fields for UI
 	bool show_demo_window = false;
@@ -120,4 +121,21 @@ private:
 	DirectX::XMVECTOR lightDirection;
 	float lightProjectionSize;
 	int shadowMapResolution;
+
+	// Resources that are shared among all post processes
+	Microsoft::WRL::ComPtr<ID3D11SamplerState> ppSampler;
+	std::shared_ptr<SimpleVertexShader> ppVS;
+	// Blur Resources
+	std::shared_ptr<SimplePixelShader> ppPS;
+	Microsoft::WRL::ComPtr<ID3D11RenderTargetView> ppRTV;	// For rendering
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> ppSRV; // For sampling
+	int blurRadius;
+
+	// Chromatic Aberration Resources
+	std::shared_ptr<SimplePixelShader> chromaticAberrationPS;
+	Microsoft::WRL::ComPtr<ID3D11RenderTargetView> chromaticAberrationRTV;	// For rendering
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> chromaticAberrationSRV; // For sampling
+	float redOffset;
+	float greenOffset;
+	float blueOffset;
 };
