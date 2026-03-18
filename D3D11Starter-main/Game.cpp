@@ -326,7 +326,7 @@ void Game::CreateShadow()
 {
 	// Initialize some fields
 	lightDirection = DirectX::XMLoadFloat3(&directionalLightDirection);
-	lightProjectionSize = 15.0f;
+	lightProjectionSize = 25.0f;
 	shadowMapResolution = 2048;
 
 
@@ -398,8 +398,8 @@ void Game::CreateShadow()
 	XMMATRIX lightProjection = XMMatrixOrthographicLH(
 		lightProjectionSize,
 		lightProjectionSize,
-		1.0f,
-		100.0f);
+		0.1f,
+		150.0f);
 	XMStoreFloat4x4(&lightProjectionMatrix, lightProjection);
 }
 
